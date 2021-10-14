@@ -32,3 +32,10 @@ jobs:
       
     - stage: cpplint
       script: python -m cpplint *.c
+
+    - stage: checking code coverage
+      script:
+        - ./gtesting
+        - mkdir coverage_results 
+        - python -m gcovr -r . -e gtest/ -e *.cpp --xml-pretty -o coverage_results/coverage.xml
+        - ./codecov -f coverage_results/coverage.xml
