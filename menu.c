@@ -6,7 +6,7 @@
 
 #include "string.h"
 
-Menu InitMenu(int count, ...) {
+Menu initMenu(int count, ...) {
   Menu menu;
   menu.items = malloc(count * sizeof(char *));
   menu.count = count;
@@ -23,9 +23,13 @@ Menu InitMenu(int count, ...) {
   return menu;
 }
 
-void FreeMenu(Menu *menu) { free(menu->items); }
+void freeMenu(Menu *menu) {
+  free(menu->items);
+  menu->items = NULL;
+  menu->count = 0;
+}
 
-int RunMenu(const Menu *menu) {
+int runMenu(const Menu *menu) {
 #if !DEBUG_MENU
 #endif  //! DEBUG
   printf("\n\n");

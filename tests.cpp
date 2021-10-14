@@ -152,3 +152,15 @@ TEST_F(list_test, grop_elems_in_not_empty_list) {
     }
   }
 }
+
+TEST(menu_test, init_free_menu_test) {
+  Menu menu = initMenu(1, "pos1");
+
+  ASSERT_TRUE(menu.items);
+  EXPECT_TRUE(!strcmp(menu.items[0], "pos1"));
+  EXPECT_EQ(menu.count, 1);
+
+  freeMenu(&menu);
+  ASSERT_FALSE(menu.items);
+  EXPECT_EQ(menu.count, 0);
+}

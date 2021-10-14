@@ -1,7 +1,7 @@
 #ifndef PCINF_H
 #define PCINF_H
 
-#define DEBUG 1
+#define DEBUG 0
 #define NAME_MAX_LEN 50
 #define SECURE_READ "%49s"
 

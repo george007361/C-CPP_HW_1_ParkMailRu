@@ -1,6 +1,6 @@
 #ifndef MENU_H
 #define MENU_H
-#define DEBUG_MENU 1
+#define DEBUG_MENU 0
 
 #include <stdio.h>
 
@@ -9,8 +9,8 @@ typedef struct Menu {
   int count;
 } Menu;
 
-Menu InitMenu(int count, ...);
-void FreeMenu(Menu *menu);
-int RunMenu(const Menu *m);
+Menu initMenu(int count, ...);
+void freeMenu(Menu *menu);
+int runMenu(const Menu *m);
 
 #endif

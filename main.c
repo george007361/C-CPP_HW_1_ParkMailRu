@@ -8,9 +8,9 @@ enum { ADD, OUT, EXIT };
 
 int main() {
   List *computers = initList();
-  Menu menu = InitMenu(3, "ADD", "OUT", "EXIT");
+  Menu menu = initMenu(3, "ADD", "OUT", "EXIT");
 
-  for (int key; (key = RunMenu(&menu)) != EXIT;) {
+  for (int key; (key = runMenu(&menu)) != EXIT;) {
     system("clear");
     switch (key) {
       case ADD: {
@@ -31,7 +31,7 @@ int main() {
     }
   }
 
-  FreeMenu(&menu);
+  freeMenu(&menu);
   if (!deinitList(&computers)) printf("Error while freeing list of cars\n");
 
   return 0;
