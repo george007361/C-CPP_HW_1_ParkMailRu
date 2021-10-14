@@ -69,9 +69,9 @@ int pushTail(List *list, const PC data) {
 
   tmp->val = data;
   tmp->prev = tmp->next = NULL;
-  if (list->head == NULL && list->tail == NULL)
+  if (list->head == NULL && list->tail == NULL) {
     list->head = list->tail = tmp;
-  else {
+  } else {
     tmp->prev = list->tail;
     list->tail->next = tmp;
     list->tail = tmp;
@@ -145,15 +145,15 @@ int groupComputers(List **list) {
       Node *data;
 
       getElem(&data, (*list), i);
-      strlen(data->val.name);
 
       if (!strcmp(data->val.name, grouped->tail->val.name)) {
         PC tmp2;
 
         delElem(&tmp2, (*list), i);
         pushTail(grouped, tmp2);
-      } else
+      } else {
         i++;
+      }
     }
   }
 
@@ -198,7 +198,6 @@ int addComputer(List *computers) {
   scanf(SECURE_READ, &new_pc.name);
 
   printf("Type count of PC's cores: ");
-  //  getchar();
   if (scanf(" %d", &new_pc.cores) != 1) {
     printf("Error of input cores. Check format\n");
     while (getchar() != '\n')

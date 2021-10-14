@@ -7,6 +7,10 @@ addons:
       - cppcheck
       - valgrind
 
+before_install:
+  - pip install gcovr
+  - pip install cpplint
+
 before_script:
   - mkdir build
   - cd build
@@ -20,3 +24,11 @@ jobs:
 
     - stage: valgrind
       script: valgrind --tool=memcheck --leak-check=full ./main < ../in.txt
+
+    - stage: cppcheck
+      script: 
+        - cd ../
+        - cppcheck --error-exitcode=1 *.c
+      
+    - stage: cpplint
+      script: python -m cpplint *.c

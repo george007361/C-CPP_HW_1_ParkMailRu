@@ -2,7 +2,12 @@
 #define MENU_H
 #define DEBUG_MENU 0
 
+#include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
+
+#include "string.h"
+
 
 typedef struct Menu {
   char **items;
