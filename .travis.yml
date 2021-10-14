@@ -15,8 +15,8 @@ before_script:
 
 jobs:
   include:
-    - stage: running пtests
-      script: ./tests
+    - stage: running gtests
+      script: ./gtesting
 
     - stage: valgrind
       script: valgrind --tool=memcheck --leak-check=full ./main < ../in.txt

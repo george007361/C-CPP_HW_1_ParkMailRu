@@ -17,6 +17,7 @@ add_library(computers STATIC ${LIB_SOURCE_FILES})
 add_executable(main main.c)
 target_link_libraries(main computers menu)
 
+add_subdirectory(./gtest)
 enable_testing()
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 
