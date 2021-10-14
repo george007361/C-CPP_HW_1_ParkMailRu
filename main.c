@@ -19,6 +19,7 @@ int main() {
         break;
       }
       case OUT: {
+        if (!groupComputers(&computers)) printf("Error while grouping cars\n");
         if (!printComputers(computers))
           printf("Error while printg cars to console\n");
 

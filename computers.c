@@ -81,6 +81,88 @@ int pushTail(List *list, const PC data) {
   return 1;
 }
 
+int getElem(Node **data, List *list, const int index) {
+  if (!list || !list->head || !list->tail || index < 0 ||
+      index >= list->count) {
+#if DEBUG
+    printf("Error access data. Check prts and index in getElem\n");
+#endif  // DEBUG
+    return 0;
+  }
+
+  *data = list->head;
+  for (size_t i = 0; i < index; i++) {
+    *data = (*data)->next;
+  }
+
+  return 1;
+}
+
+int delElem(PC *data, List *list, const int index) {
+  Node *elem;
+  if (!getElem(&elem, list, index)) {
+#if DEBUG
+    printf("Error while deleting element: can't get necessary elem\n");
+#endif  // DEBUG
+    return 0;
+  }
+
+  if (elem->prev) {
+    elem->prev->next = elem->next;
+  } else {
+    list->head = elem->next;
+  }
+  if (elem->next) {
+    elem->next->prev = elem->prev;
+  } else {
+    list->tail = elem->prev;
+  }
+  *data = elem->val;
+  list->count--;
+
+  free(elem);
+
+  return 1;
+}
+
+int groupComputers(List **list) {
+  if (!(*list)) {
+#if DEBUG
+    printf("Error: nullptr in groupComputers\n");
+#endif  // DEBUG
+    return 0;
+  }
+
+  List *grouped = initList();
+
+  while ((*list)->count) {
+    PC tmp;
+
+    delElem(&tmp, (*list), 0);
+    pushTail(grouped, tmp);
+
+    for (int i = 0; i < (*list)->count;) {
+      Node *data;
+
+      getElem(&data, (*list), i);
+      strlen(data->val.name);
+
+      if (!strcmp(data->val.name, grouped->tail->val.name)) {
+        PC tmp2;
+
+        delElem(&tmp2, (*list), i);
+        pushTail(grouped, tmp2);
+      } else
+        i++;
+    }
+  }
+
+  deinitList(list);
+  (*list) = grouped;
+
+  return 1;
+}
+
 void printComputer(PC computer) {
   printf("PC Name: %s\nCount of PC's cores: %i\nCPU freq: %f\nRAM size: %i\n\n",
          computer.name, computer.cores, computer.freqMGhz, computer.ramMB);
