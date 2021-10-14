@@ -1,0 +1,22 @@
+language: c
+
+addons:
+  apt:
+    packages:
+      - cmake
+      - cppcheck
+      - valgrind
+
+before_script:
+  - mkdir build
+  - cd build
+  - cmake ..
+  - make
+
+jobs:
+  include:
+    - stage: running пtests
+      script: ./tests
+
+    - stage: valgrind
+      script: valgrind --tool=memcheck --leak-check=full ./main < ../in.txt

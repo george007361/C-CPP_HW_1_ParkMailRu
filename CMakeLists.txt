@@ -1,12 +1,12 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.12)
 
-project(HW1_1)
+set(PROJECT_NAME HW_1_ParkMailRu)
+project(${PROJECT_NAME})
 
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDART_REQURED ON)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-add_compile_options("--coverage")
-add_link_options("--coverage")
 
 set(LIB_SOURCE_FILES menu.c)
 add_library(menu STATIC ${LIB_SOURCE_FILES})
@@ -15,15 +15,11 @@ set(LIB_SOURCE_FILES computers.c)
 add_library(computers STATIC ${LIB_SOURCE_FILES})
 
 add_executable(main main.c)
-target_link_libraries(main menu computers)
+target_link_libraries(main computers menu)
 
 enable_testing()
-find_package(GTest REQUIRED)
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
-include_directories(${GTEST_INCLUDE_DIRS})
+include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 
-add_executable(tests tests.cpp)
-target_link_libraries(tests ${GTEST_LIBRARIES} menu computers Threads::Threads )
-
+add_executable(gtesting gtesting.cpp)
+target_link_libraries(gtesting gtest menu computers -lpthread)
 
