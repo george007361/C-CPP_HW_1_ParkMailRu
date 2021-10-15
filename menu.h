@@ -1,21 +1,15 @@
 #ifndef MENU_H
 #define MENU_H
+
 #define DEBUG_MENU 0
-
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-
-#include "string.h"
-
 
 typedef struct Menu {
   char **items;
   int count;
 } Menu;
 
-Menu initMenu(int count, ...);
-void freeMenu(Menu *menu);
-int runMenu(const Menu *m);
+Menu init_menu(int count, ...);
+void free_menu(Menu *menu);
+int run_menu(const Menu *m);
 
 #endif

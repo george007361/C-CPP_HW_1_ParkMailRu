@@ -1,8 +1,20 @@
 #include "menu.h"
 
-Menu initMenu(int count, ...) {
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "string.h"
+
+Menu init_menu(int count, ...) {
   Menu menu;
   menu.items = malloc(count * sizeof(char *));
+  if (!menu.items) {
+#ifdef DEBUG
+    printf("Menu init: cant alloc mem\n");
+#endif  // DEBUG
+    exit(1);
+  }
   menu.count = count;
 
   va_list factor;           // указатель va_list
@@ -17,13 +29,13 @@ Menu initMenu(int count, ...) {
   return menu;
 }
 
-void freeMenu(Menu *menu) {
+void free_menu(Menu *menu) {
   free(menu->items);
   menu->items = NULL;
   menu->count = 0;
 }
 
-int runMenu(const Menu *menu) {
+int run_menu(const Menu *menu) {
 #if !DEBUG_MENU
 #endif  // !DEBUG
   printf("\n\n");

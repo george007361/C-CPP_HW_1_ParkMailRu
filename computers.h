@@ -5,10 +5,6 @@
 #define NAME_MAX_LEN 50
 #define SECURE_READ "%49s"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 typedef struct PC {
   char name[NAME_MAX_LEN];
   int cores;
@@ -29,15 +25,15 @@ typedef struct List {
   int count;
 } List;
 
-List *initList();
-int deinitList(List **list);
-int popTail(PC *data, List *list);
-int pushHead(List *list, const PC data);
-int pushTail(List *list, const PC data);
-int getElem(Node **data, List *list, const int index);
-int groupComputers(List **list);
-int addComputer(List *computers);
-int printComputers(const List *const list);
-int delElem(PC *data, List *list, const int index);
+int init_list(List **list);
+int deinit_list(List **list);
+int pop_tail(PC *data, List *list);
+int push_head(List *list, const PC data);
+int push_tail(List *list, const PC data);
+int get_elem(Node **data, List *list, const int index);
+int group_computers(List **list);
+int add_computer(List *computers);
+int print_computers(const List *const list);
+int get_and_remove(PC *data, List *list, const int index);
 
 #endif

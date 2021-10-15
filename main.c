@@ -7,20 +7,25 @@
 enum { ADD, OUT, EXIT };
 
 int main() {
-  List *computers = initList();
-  Menu menu = initMenu(3, "ADD", "OUT", "EXIT");
+  List *computers;
+  if (!init_list(&computers)) {
+    printf("Error initialising list of computers\n");
+    return EXIT_FAILURE;
+  }
 
-  for (int key; (key = runMenu(&menu)) != EXIT;) {
+  Menu menu = init_menu(3, "ADD", "OUT", "EXIT");
+
+  for (int key; (key = run_menu(&menu)) != EXIT;) {
     system("clear");
     switch (key) {
       case ADD: {
-        if (!addComputer(computers)) printf("Error while adding car\n");
+        if (!add_computer(computers)) printf("Error while adding car\n");
 
         break;
       }
       case OUT: {
-        if (!groupComputers(&computers)) printf("Error while grouping cars\n");
-        if (!printComputers(computers))
+        if (!group_computers(&computers)) printf("Error while grouping cars\n");
+        if (!print_computers(computers))
           printf("Error while printg cars to console\n");
 
         break;
@@ -31,8 +36,8 @@ int main() {
     }
   }
 
-  freeMenu(&menu);
-  if (!deinitList(&computers)) printf("Error while freeing list of cars\n");
+  free_menu(&menu);
+  if (!deinit_list(&computers)) printf("Error while freeing list of cars\n");
 
-  return 0;
+  return EXIT_SUCCESS;
 }

@@ -1,15 +1,24 @@
 #include "computers.h"
 
-List *initList() {
-  List *list = (List *)malloc(sizeof(List));
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-  list->head = list->tail = NULL;
-  list->count = 0;
+int init_list(List **list) {
+  *list = (List *)malloc(sizeof(List));
+  if (!(*list)) {
+#if DEBUG
+    printf("init_list(): malloc error");
+#endif  // DEBUG
+    return 0;
+  }
+  (*list)->head = (*list)->tail = NULL;
+  (*list)->count = 0;
 
-  return list;
+  return 1;
 }
 
-int deinitList(List **list) {
+int deinit_list(List **list) {
   if (!(*list)) {
 #if DEBUG
     printf("Empty list ptr in deinitList\n");
@@ -32,7 +41,7 @@ int deinitList(List **list) {
   return 1;
 }
 
-int popTail(PC *data, List *list) {
+int pop_tail(PC *data, List *list) {
   if (!list || !list->tail) {
 #ifdef DEBUG
 
@@ -57,7 +66,7 @@ int popTail(PC *data, List *list) {
   return 1;
 }
 
-int pushTail(List *list, const PC data) {
+int push_tail(List *list, const PC data) {
   if (!list) {
 #if DEBUG
     printf("Error: nullprt list in pushTail\n");
@@ -66,7 +75,12 @@ int pushTail(List *list, const PC data) {
   }
 
   Node *tmp = (Node *)malloc(sizeof(Node));
-
+  if (!tmp) {
+#if DEBUG
+    printf("push_tail: malloc error\n");
+#endif  // DEBUG
+    return 0;
+  }
   tmp->val = data;
   tmp->prev = tmp->next = NULL;
   if (list->head == NULL && list->tail == NULL) {
@@ -81,7 +95,7 @@ int pushTail(List *list, const PC data) {
   return 1;
 }
 
-int getElem(Node **data, List *list, const int index) {
+int get_elem(Node **data, List *list, const int index) {
   if (!list || !list->head || !list->tail || index < 0 ||
       index >= list->count) {
 #if DEBUG
@@ -98,9 +112,9 @@ int getElem(Node **data, List *list, const int index) {
   return 1;
 }
 
-int delElem(PC *data, List *list, const int index) {
+int get_and_remove(PC *data, List *list, const int index) {
   Node *elem;
-  if (!getElem(&elem, list, index)) {
+  if (!get_elem(&elem, list, index)) {
 #if DEBUG
     printf("Error while deleting element: can't get necessary elem\n");
 #endif  // DEBUG
@@ -125,7 +139,7 @@ int delElem(PC *data, List *list, const int index) {
   return 1;
 }
 
-int groupComputers(List **list) {
+int group_computers(List **list) {
   if (!(*list)) {
 #if DEBUG
     printf("Error: nullptr in groupComputers\n");
@@ -133,42 +147,48 @@ int groupComputers(List **list) {
     return 0;
   }
 
-  List *grouped = initList();
+  List *grouped;
+  if (!init_list(&grouped)) {
+#if DEBUG
+    printf("Error\n");
+#endif  // DEBUG
+    return 0;
+  }
 
   while ((*list)->count) {
     PC tmp;
 
-    delElem(&tmp, (*list), 0);
-    pushTail(grouped, tmp);
+    get_and_remove(&tmp, (*list), 0);
+    push_tail(grouped, tmp);
 
     for (int i = 0; i < (*list)->count;) {
       Node *data;
 
-      getElem(&data, (*list), i);
+      get_elem(&data, (*list), i);
 
       if (!strcmp(data->val.name, grouped->tail->val.name)) {
         PC tmp2;
 
-        delElem(&tmp2, (*list), i);
-        pushTail(grouped, tmp2);
+        get_and_remove(&tmp2, (*list), i);
+        push_tail(grouped, tmp2);
       } else {
         i++;
       }
     }
   }
 
-  deinitList(list);
+  deinit_list(list);
   (*list) = grouped;
 
   return 1;
 }
 
-void printComputer(PC computer) {
+void print_computer(PC computer) {
   printf("PC Name: %s\nCount of PC's cores: %i\nCPU freq: %f\nRAM size: %i\n\n",
          computer.name, computer.cores, computer.freqMGhz, computer.ramMB);
 }
 
-int printComputers(const List *const list) {
+int print_computers(const List *const list) {
   if (!list || ((!list->head || !list->tail) && list->count > 0)) {
 #if DEBUG
     printf("Error: printComputers nullptr or damaged list\n");
@@ -180,7 +200,7 @@ int printComputers(const List *const list) {
 
   for (int i = 0; i < list->count; i++) {
     printf("%i) ", i + 1);
-    printComputer(tmp->val);
+    print_computer(tmp->val);
     tmp = tmp->next;
   }
 
@@ -191,7 +211,7 @@ int printComputers(const List *const list) {
   return 1;
 }
 
-int addComputer(List *computers) {
+int add_computer(List *computers) {
   PC new_pc;
 
   printf("\nType PC Name: ");
@@ -221,5 +241,5 @@ int addComputer(List *computers) {
     return 0;
   }
 
-  return pushTail(computers, new_pc);
+  return push_tail(computers, new_pc);
 }
