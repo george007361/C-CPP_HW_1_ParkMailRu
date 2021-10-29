@@ -1,0 +1,4 @@
+add_library(parallel_identif src/parallel_identif.c)
+target_include_directories(parallel_identif PUBLIC include)
+
+target_link_libraries(parallel_identif PUBLIC digraphs)

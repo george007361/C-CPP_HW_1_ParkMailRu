@@ -1,0 +1,9 @@
+/media/sf_H_DRIVE/github/C-CPP_Hw 2 fork/C-CPP_HW_2_ParkMailRu/build/CMakeFiles/rebuild_cache.dir
+/media/sf_H_DRIVE/github/C-CPP_Hw 2 fork/C-CPP_HW_2_ParkMailRu/build/CMakeFiles/edit_cache.dir
+/media/sf_H_DRIVE/github/C-CPP_Hw 2 fork/C-CPP_HW_2_ParkMailRu/build/CMakeFiles/main.dir
+/media/sf_H_DRIVE/github/C-CPP_Hw 2 fork/C-CPP_HW_2_ParkMailRu/build/lib/digraphs/CMakeFiles/rebuild_cache.dir
+/media/sf_H_DRIVE/github/C-CPP_Hw 2 fork/C-CPP_HW_2_ParkMailRu/build/lib/digraphs/CMakeFiles/edit_cache.dir
+/media/sf_H_DRIVE/github/C-CPP_Hw 2 fork/C-CPP_HW_2_ParkMailRu/build/lib/digraphs/CMakeFiles/digraphs.dir
+/media/sf_H_DRIVE/github/C-CPP_Hw 2 fork/C-CPP_HW_2_ParkMailRu/build/lib/parallel_identif/CMakeFiles/rebuild_cache.dir
+/media/sf_H_DRIVE/github/C-CPP_Hw 2 fork/C-CPP_HW_2_ParkMailRu/build/lib/parallel_identif/CMakeFiles/edit_cache.dir
+/media/sf_H_DRIVE/github/C-CPP_Hw 2 fork/C-CPP_HW_2_ParkMailRu/build/lib/parallel_identif/CMakeFiles/parallel_identif.dir
