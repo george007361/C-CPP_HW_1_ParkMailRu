@@ -1,2 +1,0 @@
-/usr/bin/ar qc libdigraphs.a CMakeFiles/digraphs.dir/src/digraphs.c.o
-/usr/bin/ranlib libdigraphs.a

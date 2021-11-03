@@ -1,2 +1,0 @@
-/usr/bin/ar qc libparallel_identif.a CMakeFiles/parallel_identif.dir/src/parallel_identif.c.o
-/usr/bin/ranlib libparallel_identif.a

@@ -5,12 +5,21 @@
 #define DIGRAPH_LEN 2
 
 typedef struct Digraph {
-  char key[DIGRAPH_LEN];
+  char *key;
   unsigned long count;
 } Digraph;
+
+// void init_digraph();
+Digraph *create_digraph();
+Digraph *set_digraph(Digraph *digraph, const char *key,
+                     const unsigned long count);
+Digraph *set_digraph_key(Digraph *digraph, const char *key);
+Digraph *set_digraph_count(Digraph *digraph, const unsigned long count);
+Digraph *clear_digraph(Digraph *digraph);
+void free_digraph(Digraph *digraph);
 
 void interating_all(Digraph *digraphs, const int digraphs_count, char *array,
                     const size_t len);
 long interating_part(const char *key, char *array, const size_t len);
 
-#endif // !ALGS_H
+#endif  // !ALGS_H
