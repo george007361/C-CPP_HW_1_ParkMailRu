@@ -18,8 +18,6 @@ Digraph *set_digraph_count(Digraph *digraph, const unsigned long count);
 Digraph *clear_digraph(Digraph *digraph);
 void free_digraph(Digraph *digraph);
 
-void interating_all(Digraph *digraphs, const int digraphs_count, char *array,
-                    const size_t len);
-long interating_part(const char *key, char *array, const size_t len);
-
+unsigned long counter_simple(const char *array, const size_t len,
+                             const char *key);
 #endif  // !ALGS_H

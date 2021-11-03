@@ -8,125 +8,106 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-int indentification_parallel(
-    size_t *count, const char *array, const size_t array_len,
-    Digraph *digraph) {  //, const size_t separates_count
+enum {
+  EXIT_OK,
+  EXIT_FAIL,
+  EXIT_DIGRAPH_COUNTED_OK,
+  EXIT_CANT_ALLOC_MEM,
+  EXIT_CANT_FORK
+};
 
-  long systems_proc_count = sysconf(_SC_NPROCESSORS_ONLN);
-  pid_t *curr_task_pids = (pid_t *)malloc(systems_proc_count * sizeof(pid_t));
+int parse_using_digraph(unsigned long *count, const char *text,
+                        const size_t text_len, const char *key) {
+  long system_has_processors = sysconf(_SC_NPROCESSORS_ONLN);
 
-  if (!curr_task_pids) {
-    sprintf(stderr,
-            "Can not allocate mem for pids in indentification_parallel()\n");
-    return EXIT_FAILURE;
+  pid_t *part_pids = (pid_t *)malloc(system_has_processors * sizeof(pid_t));
+  if (!part_pids) {
+    fprintf(
+        stderr,
+        "Error parse_using_digraph(): cant allocate memory for pids array\n");
+    return EXIT_CANT_ALLOC_MEM;
   }
 
-  // size_t *shared_memory = mmap(NULL, sizeof(size_t), PROT_READ | PROT_WRITE,
-  //                              MAP_SHARED | MAP_ANONYMOUS, -1, 0);
-  // if (!shared_memory) {
-  //   printf("Failed to map\n");
-  //   return EXIT_FAILURE;
-  // }
-  // *shared_memory = 0;
-
-  size_t step = array_len / systems_proc_count + 1;
-
-  char *ptr = array;
-  for (size_t i = 0; i < systems_proc_count; i++) {
-    pid_t curr_task_pid = fork();
-    curr_task_pids[i] = curr_task_pid;
-
-    if (curr_task_pid == -1) {
-      sprintf(stderr, "Cant fork in indentification_parallel()\n");
-      return EXIT_FAILURE;
+  char *ptr = text;
+  size_t step = text_len / system_has_processors + 1;
+  for (size_t i = 0; i < system_has_processors; i++) {
+    part_pids[i] = fork();
+    if (part_pids[i] == -1) {
+      printf(stderr,
+             "Error parse_using_digraph(): Cant fork to separate text and "
+             "count parallelly. %lu\n",
+             i);
+      return EXIT_CANT_FORK;
     }
 
-    if (!curr_task_pid) {
-      // sleep(50);
-      // printf("task %d\n", i);
-      // *shared_memory += interating_part(digraph -> key, ptr, step);
-      (*count) += interating_part(digraph->key, ptr, step);
-      printf("counting separated %s %d", digraph->key, *count);
-      exit(0);
+    if (!part_pids[i]) {
+      // Считаем количество данного диграфа в данном фрагменте длиной step
+      *count += counter_simple(ptr, step, key);
+      exit(EXIT_OK);
     }
     ptr += step;
   }
 
-  for (size_t i = 0; i < systems_proc_count; i++) {
-    // printf("wait task %d %d\n", i, curr_task_pids[i]);
-    while (waitpid(curr_task_pids[i], NULL, 0) > 0)
+  for (size_t i = 0; i < system_has_processors; i++) {
+    while (waitpid(part_pids[i], NULL, 0) > 0)
       ;
   }
 
-  // printf("--- %d ---\n", *shared_memory);
-
-  // if (munmap(shared_memory, sizeof(size_t))) {
-  //   sprintf(stderr, "Cannot unmap mem\n");
-  //   return EXIT_FAILURE;
-  // }
-
-  free(curr_task_pids);
-  return EXIT_SUCCESS;
+  free(part_pids);
+  return EXIT_OK;
 }
 
-int indentification_parallel_all(const char *array, const size_t array_len,
-                                 Digraph *digraphs_arr,
-                                 const size_t digraphs_arr_len) {
-  pid_t *digr_pids = (pid_t *)malloc(digraphs_arr_len * sizeof(pid_t));
-  if (!digr_pids) {
-    sprintf(
+int parse_text(const char *text, const size_t text_len, Digraph **digraphs,
+               const size_t digraphs_count) {
+  pid_t *digraph_pids = (pid_t *)malloc(digraphs_count * sizeof(pid_t));
+  if (!digraph_pids) {
+    fprintf(
         stderr,
-        "Can not allocate mem for pids in indentification_parallel_all()\n");
-    return EXIT_FAILURE;
+        "Error parse_text(): cant allocate memory for digraphs pids array\n");
+    return EXIT_CANT_ALLOC_MEM;
   }
 
-  size_t *curr_task_pids = (size_t *)calloc(digraphs_arr_len, sizeof(size_t));
-  size_t *shared_memory =
-      mmap(NULL, digraphs_arr_len * sizeof(size_t), PROT_READ | PROT_WRITE,
+  unsigned long *count_arr_shared =
+      mmap(NULL, digraphs_count * sizeof(unsigned long), PROT_READ | PROT_WRITE,
            MAP_SHARED | MAP_ANONYMOUS, -1, 0);
-  if (!shared_memory) {
-    printf("Failed to map\n");
-    return EXIT_FAILURE;
+  if (!count_arr_shared) {
+    fprintf(stderr,
+            "Error: parse_text(): Cant allocate memory for  shared memory\n");
+    return EXIT_CANT_ALLOC_MEM;
   }
-  // memset(shared_memory, 0, digraphs_arr_len * sizeof(size_t));
 
-  printf("init: ");
-  for (size_t i = 0; i < 2; i++) {
-    printf("%d ", shared_memory[i]);
-  }
-  printf("\n");
-
-  for (size_t i = 0; i < digraphs_arr_len; i++) {
-    pid_t digr_curr_pid = fork();
-    digr_pids[i] = digr_curr_pid;
-    if (digr_curr_pid == -1) {
-      sprintf(stderr, "Cant fork in indentification_parallel_all()\n");
-      return EXIT_FAILURE;
+  for (size_t i = 0; i < digraphs_count; i++) {
+    digraph_pids[i] = fork();
+    if (digraph_pids[i] == -1) {
+      printf(
+          stderr,
+          "Error parse_text(): Cant fork to separate digraphs parsing. %lu\n",
+          i);
+      return EXIT_CANT_FORK;
     }
-    if (!digr_curr_pid) {
-      // printf("%d\n", i);
-      // exit(0);
-      indentification_parallel(&shared_memory[i], array, array_len,
-                               &digraphs_arr[i]);
-      printf("ended counting digraph %d \n", shared_memory[i]);
-      exit(1);
+
+    if (!digraph_pids[i]) {
+      // Считаем количество i-ого диграфа в тексте в отдельном процессе
+      sleep(2);
+      parse_using_digraph(&count_arr_shared[i], text, text_len,
+                          digraphs[i]->key);
+      exit(EXIT_DIGRAPH_COUNTED_OK);
     }
   }
-  for (size_t i = 0; i < digraphs_arr_len; i++) {
-    while (waitpid(digr_pids[i], NULL, 0) > 0)
+
+  for (size_t i = 0; i < digraphs_count; i++) {
+    while (waitpid(digraph_pids[i], NULL, 0) > 0)
       ;
   }
-
-  printf("init: ");
-  for (size_t i = 0; i < 2; i++) {
-    printf("%d ", shared_memory[i]);
+  for (size_t i = 0; i < digraphs_count; i++) {
+    printf("%lu ", count_arr_shared[i]);
   }
-  printf("\n");
-
-  if (munmap(shared_memory, sizeof(size_t))) {
-    sprintf(stderr, "Cannot unmap mem\n");
-    return EXIT_FAILURE;
+  printf("ok! Enden\n");
+  if (munmap(count_arr_shared, digraphs_count * sizeof(unsigned long))) {
+    sprintf(stderr, "Error parse_text(): Cannot unmap mem\n");
+    return EXIT_FAIL;
   }
-  free(digr_pids);
-  return EXIT_SUCCESS;
+
+  free(digraph_pids);
+  return EXIT_OK;
 }

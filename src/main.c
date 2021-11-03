@@ -17,15 +17,27 @@ enum {
   EXIT_CANT_SET_DIGRAPH,
   EXIT_CANT_MALLOC_MEM
 };
+
 #define DEFAULT_MODE 1
 #define DATA_BUFF_SIZE_MB 100
 #define DIGRAPH_PTR_BUFF_SIZE 2
 #define BUFF_SIZE_MB 100
+unsigned long counter_simple2(const char *array, const size_t len,
+                              const char *key);
+unsigned long counter_simple2(const char *array, const size_t len,
+                              const char *key) {
+  unsigned long count = 0;
+  int step = strlen(key);
+  for (char *ptr = strstr(array, key); ptr && ptr - array < len;
+       ptr = strstr(ptr + step, key))
+    count++;
+  return count;
+}
 
 int main(int argc, char *argv[]) {
   int opt = 0;
   int long_index = 0;
-  char *file_path;
+  char *file_path = 0;  //"./data/ex.txt";
   int fpath_added = 0;
   int mode = DEFAULT_MODE;
 
@@ -41,11 +53,13 @@ int main(int argc, char *argv[]) {
 
   while ((opt = getopt_long(argc, argv, "f:m:", longopt, &long_index)) != -1) {
     switch (opt) {
+      default:
       case 'h': {
         printf(
             "Usage:\n"
             "--mode <1 or 0>\n\t1 parallel\n\t0 sequential\n\tDefault: 1\n\n"
             "--filepath <path to data file>\n\tNECESSARY ARG\n\n"
+            "--digraph \"<Digraph name>\"\n\n"
             "--help for help\n\n");
         return EXIT_FOR_HELP;
       }
@@ -60,31 +74,30 @@ int main(int argc, char *argv[]) {
           fpath_added = 1;
           printf("%s\n", file_path);
         } else {
-          printf("Error: incorrect filepath: \"%s\"\n\n", optarg);
+          fprintf(stderr, "Error main(): incorrect filepath: \"%s\"\n\n",
+                  optarg);
           return EXIT_INCOR_FILEPATH;
         }
         break;
       }
       case 'd': {
         Digraph *new_digraph = create_digraph();
-        if (!new_digraph) {
-          printf(stderr);
-          return EXIT_CANT_CR_DIGRAPH;
-        }
-        if (!set_digraph(new_digraph, optarg, 0)) {
-          printf(stderr);
-          return EXIT_CANT_SET_DIGRAPH;
-        }
+        if (!new_digraph) return EXIT_CANT_CR_DIGRAPH;
+        if (!set_digraph(new_digraph, optarg, 0)) return EXIT_CANT_SET_DIGRAPH;
+
         if (digraphs_count == digraphs_count_max) {
           Digraph **new_digraphs =
               (Digraph **)malloc((digraphs_count_max *= 2));
           if (!new_digraphs) {
             free(digraphs);
-            printf("Cant realloc mem for new digraphs arra. new size %d\n",
-                   digraphs_count_max);
+            fprintf(stderr,
+                    "Error main(): Cant realloc mem for new digraphs array. "
+                    "New size %d\n",
+                    digraphs_count_max);
             return EXIT_CANT_MALLOC_MEM;
           }
-          memcpy(new_digraphs, digraphs, digraphs_count);
+          for (size_t i = 0; i < digraphs_count; i++)
+            new_digraphs[i] = digraphs[i];
           free(digraphs);
           digraphs = new_digraphs;
         }
@@ -92,45 +105,28 @@ int main(int argc, char *argv[]) {
         digraphs_count++;
         break;
       }
-      default:
-        exit(666);
     }
   }
 
   if (!fpath_added) {
     printf(
         "There are not necessary args added. Use --help key for help\nFile "
-        "path: %d\n digraphs added count: %d\n\n",
+        "path: %d\n Digraphs added count: %d\n\n",
         fpath_added, digraphs_count);
     return EXIT_NO_NEC_PARAMS;
   }
 
-  // free_digraph(sad);
-  // for (size_t i = 0; i < digraphs_count; i++)
-  // {
-  //   free_digraph(digraphs[i]);
-  // }
-  // free(digraphs);
-  // return EXIT_OK;
-
-
-
-
-
-
-
-
-
   size_t buff_size = BUFF_SIZE_MB * 1024 * 1024 / sizeof(char);
   char *buffer = (char *)malloc(buff_size);
   if (!buffer) {
-    printf("Error: cannot alloc buffer for %i Mb\n", BUFF_SIZE_MB);
+    fprintf(stderr, "Error main(): cannot alloc buffer for %i Mb\n",
+            BUFF_SIZE_MB);
     return EXIT_FAILURE;
   }
 
   FILE *file = fopen(file_path, "r");
   if (!file) {
-    printf("Error: cannot open file %s\n", file_path);
+    fprintf(stderr, "Error main(): cannot open file %s\n", file_path);
     return EXIT_FAILURE;
   }
 
@@ -140,57 +136,25 @@ int main(int argc, char *argv[]) {
   buff_size = f_real_len > buff_size ? buff_size : f_real_len;
 
   if (!fread(buffer, buff_size, sizeof(char), file)) {
-    printf("Error: cant read file\n");
+    fprintf(stderr, "Error main(): cant read file %s\n", file_path);
     return EXIT_FAILURE;
   }
 
   if (fclose(file)) {
-    printf("Error: can't close file\n");
+    fprintf(stderr, "Error: can't close file %s\n", file_path);
     return EXIT_FAILURE;
   }
 
   puts(buffer);
 
-  // size_t digraphs_count = 2;
-  // Digraph **digraphs = (Digraph **)malloc(sizeof(Digraph *) *
-  // digraphs_count); if (!digraphs) {
-  //   printf("Can't alloc mem for digraph is main()\n");
-  //   return EXIT_FAILURE;
-  // }
+  parse_text(buffer, buff_size - 1, digraphs, digraphs_count);
 
-  // Digraph *happy, *sad = create_digraph();
-  // if (!happy || !sad) {
-  //   printf(stderr);
-  //   return EXIT_FAILURE;
-  // }
-
-  // if (!set_digraph(happy, ":)", 0) || !set_digraph(sad, ":(", 0)) {
-  //   printf(stderr);
-  //   return EXIT_FAILURE;
-  // }
-
-  // digraphs[0] = happy;
-  // digraphs[1] = sad;
-  // for (size_t i = 0; i < digraphs_count; i++) {
-  //   printf("%s ", digraphs[i]->key);
-  // }
-  // printf("\n\n");
-
-  if (indentification_parallel_all(buffer, buff_size, *digraphs,
-                                   digraphs_count))
-    printf("--%lu\n", digraphs[0]->count);
-  else
-    printf(stderr);
-
-  // free_digraph(happy);
-  // free_digraph(sad);
-  for (size_t i = 0; i < digraphs_count; i++)
-  {
+  for (size_t i = 0; i < digraphs_count; i++) {
     free_digraph(digraphs[i]);
   }
+
   free(digraphs);
-  
   free(buffer);
-  printf("main\n");
+  free(file_path);
   return EXIT_SUCCESS;
 }

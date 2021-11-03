@@ -24,9 +24,9 @@ Digraph *set_digraph_key(Digraph *digraph, const char *key) {
     return NULL;
   }
   size_t len = strlen(key);
-  digraph->key = (char *)malloc(sizeof(char) * len + 1);
+  digraph->key = (char *)malloc(sizeof(char) * len);
   memcpy(digraph->key, key, len);
-  digraph->key[len] = '\n';
+  // digraph->key[len] = '\n';
   return digraph;
 }
 
@@ -61,19 +61,13 @@ Digraph *set_digraph(Digraph *digraph, const char *key,
   return digraph;
 }
 
-void interating_all(Digraph *digraphs, const int digraphs_count, char *array,
-                    const size_t len) {
-  for (size_t i = 0; i < digraphs_count; i++) {
-    digraphs[i].count = interating_part(digraphs[i].key, array, len);
-  }
-}
-
-long interating_part(const char *key, char *array, const size_t len) {
+unsigned long counter_simple(const char *array, const size_t len,
+                             const char *key) {
+  unsigned long count = 0;
   size_t step = strlen(key);
-  long count = 0;
-  for (char *p = array; (p = strstr(p, key)) + step - array < len;) {
+  for (char *ptr = strstr(array, key); ptr && ptr - array < len;
+       ptr = strstr(ptr + step, key)) {
     count++;
-    p += step;
   }
   return count;
 }
