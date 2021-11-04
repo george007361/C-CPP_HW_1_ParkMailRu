@@ -30,10 +30,13 @@ Graph *set_graph_key(Graph *graph, const char *key) {
   }
 
   size_t len = strlen(key);
-  graph->key = (char *)malloc(sizeof(char) * len);
-  memcpy(graph->key, key, len);
-  // graph->key[len] = '\n';
+  graph->key = (char *)malloc(sizeof(char) * len + 1);
+  if (!graph) {
+    fprintf(stderr, "Can't acllocate mem for graph's name\n");
 
+    return NULL;
+  }
+  strcpy(graph->key, key);
   return graph;
 }
 
@@ -49,8 +52,7 @@ Graph *set_graph_count(Graph *graph, const unsigned long count) {
   return graph;
 }
 
-Graph *set_graph(Graph *graph, const char *key,
-                     const unsigned long count) {
+Graph *set_graph(Graph *graph, const char *key, const unsigned long count) {
   if (!set_graph_key(graph, key)) return NULL;
   if (!set_graph_count(graph, count)) return NULL;
 
@@ -60,7 +62,7 @@ Graph *set_graph(Graph *graph, const char *key,
 Graph *clear_graph(Graph *graph) {
   if (!graph) {
     fprintf(stderr, "Empy graph clear_degraph()\n");
-    
+
     return NULL;
   }
 

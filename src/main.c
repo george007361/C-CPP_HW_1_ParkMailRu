@@ -19,8 +19,8 @@ enum {
 };
 
 #define DEFAULT_MODE 1
-#define DATA_BUFF_SIZE_MB 100
-#define GRAPH_PTR_BUFF_SIZE 2
+#define DATA_BUFF_SIZE_MB 1
+#define GRAPH_PTR_BUFF_SIZE 1
 
 int main(int argc, char *argv[]) {
   int opt = 0;
@@ -116,8 +116,8 @@ int main(int argc, char *argv[]) {
     return EXIT_NO_NEC_PARAMS;
   }
 
-  size_t buff_size = DATA_BUFF_SIZE_MB * 1024 * 1024 / sizeof(char);
-  char *buffer = (char *)malloc(buff_size);
+  size_t buffer_size = DATA_BUFF_SIZE_MB * 1024 * 1024 / sizeof(char);
+  char *buffer = (char *)malloc(buffer_size + 1);
   if (!buffer) {
     fprintf(stderr, "Error main(): cannot alloc buffer for %i Mb\n",
             DATA_BUFF_SIZE_MB);
@@ -134,7 +134,7 @@ int main(int argc, char *argv[]) {
   }
 
   size_t bytes_read;
-  while (bytes_read = fread(buffer, sizeof(char), buff_size, file)) {
+  while (bytes_read = fread(buffer, sizeof(char), buffer_size, file)) {
     if (ferror(file)) {
       fprintf(stderr, "Error main(): cant read file %s\n", file_path);
 

@@ -12,7 +12,7 @@ endif()
 
 option(WITH_SANITIZERS "Add address sanitizer")
 if(WITH_SANITIZERS)
-    add_compile_options(-fno-omit-frame-pointer -fsanitize=address)
+    add_compile_options(-fno-omit-frame-pointer -g -fsanitize=address)
     add_link_options(-fsanitize=address)
 endif()
 
