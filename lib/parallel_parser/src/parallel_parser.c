@@ -64,7 +64,7 @@ int parse_using_graph(unsigned long *count, const char *text,
 int parse_text(const char *text, const size_t text_len, Graph **graphs,
                const size_t graphs_count) {
   // printf("Using parallel parser...\n");
-
+  //Выделяем массив для хранения pid дочерних
   pid_t *graph_pids = (pid_t *)malloc(graphs_count * sizeof(pid_t));
   if (!graph_pids) {
     fprintf(stderr,
@@ -72,7 +72,7 @@ int parse_text(const char *text, const size_t text_len, Graph **graphs,
 
     return EXIT_CANT_ALLOC_MEM;
   }
-
+  // Общая область памяти для параллельных вычислений
   unsigned long *count_arr_shared =
       mmap(NULL, graphs_count * sizeof(unsigned long), PROT_READ | PROT_WRITE,
            MAP_SHARED | MAP_ANONYMOUS, -1, 0);
@@ -82,9 +82,10 @@ int parse_text(const char *text, const size_t text_len, Graph **graphs,
 
     return EXIT_CANT_ALLOC_MEM;
   }
-
+//Вычисляем количесто каждого графа(он же искомая подстрока) в тексте
   for (size_t i = 0; i < graphs_count; i++) {
-    graph_pids[i] = fork();
+    graph_pids[i] = fork();  // отделяем подсчёт i-ой подстроки в отдельный
+                             // процесс, сохраняем его pid в массив
     if (graph_pids[i] == -1) {
       fprintf(stderr,
               "Error parse_text(): Cant fork to separate graphs parsing. %lu\n",
@@ -94,19 +95,27 @@ int parse_text(const char *text, const size_t text_len, Graph **graphs,
     }
 
     if (!graph_pids[i]) {
-      // Считаем количество i-ого диграфа в тексте в отдельном процессе
-      // sleep(2);
-      parse_using_graph(&count_arr_shared[i], text, text_len, graphs[i]->key);
+      // Если это отделенный процесс, то Считаем количество i-ого графа в
+      // тексте в отдельном процессе с помощью функции parse_using_graph, пока
+      // закомментил, тк там аналогичная проблема
+
+      // parse_using_graph(&count_arr_shared[i], text, text_len,
+      // graphs[i]->key);
 
       exit(EXIT_GRAPH_COUNTED_OK);
+    } else {
+      // если это родитель, то ничего не делаем и идём на новую итерацию
     }
   }
+  // Все подстроки посчитаны
 
+  // Ждём дочерные процессы, которые считают количество искомой подстроки в
+  // тексте по их зid
   for (size_t i = 0; i < graphs_count; i++) {
     while (waitpid(graph_pids[i], NULL, 0) > 0)
       ;
   }
-
+// Переносим данные из общей области на свои места
   for (size_t i = 0; i < graphs_count; i++)
     graphs[i]->count += count_arr_shared[i];
 
@@ -117,6 +126,6 @@ int parse_text(const char *text, const size_t text_len, Graph **graphs,
   }
 
   free(graph_pids);
-
+  // Выходим, когда всё посчитали и можно давать ответ в main. Должна вызваться один раз.
   return EXIT_OK;
 }

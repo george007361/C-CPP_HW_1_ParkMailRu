@@ -23,6 +23,16 @@ enum {
 #define GRAPH_PTR_BUFF_SIZE 1
 
 int main(int argc, char *argv[]) {
+  printf(
+      "First stroke in main()\n");  // Вот эта строка должна вызываться один
+                                    // раз, то есть при запуске программы. Но
+                                    // отлаживая код и выводе в файл результата
+                                    // через ./build/main --filepath
+                                    // ./data/ex.txt --graph ":)" >out.txt
+                                    // заметил, что почему то эта строка
+                                    // выполняется много раз, видимо столько же,
+                                    // сколько процессов насоздавал.
+  //Выделяем переменные для парсинка аргументов
   int opt = 0;
   int long_index = 0;
   char *file_path = 0;  //"./data/ex.txt";
@@ -36,7 +46,7 @@ int main(int argc, char *argv[]) {
                                     {"mode", required_argument, 0, 'm'},
                                     {"help", no_argument, 0, 'h'},
                                     {"graph", required_argument, 0, 'd'}};
-
+  //Парсим аргументы
   while ((opt = getopt_long(argc, argv, "f:m:", longopt, &long_index)) != -1) {
     switch (opt) {
       default:
@@ -64,7 +74,7 @@ int main(int argc, char *argv[]) {
 
         if (file_path) {
           fpath_added = 1;
-          printf("%s\n", file_path);
+          // printf("%s\n", file_path);
         } else {
           fprintf(stderr, "Error main(): incorrect filepath: \"%s\"\n\n",
                   optarg);
@@ -106,7 +116,7 @@ int main(int argc, char *argv[]) {
       }
     }
   }
-
+  //Проверяем наличие нужных параметров
   if (!fpath_added) {
     printf(
         "There are not necessary args added. Use --help key for help\nFile "
@@ -115,7 +125,7 @@ int main(int argc, char *argv[]) {
 
     return EXIT_NO_NEC_PARAMS;
   }
-
+  // Выделяем буфер заданного размера
   size_t buffer_size = DATA_BUFF_SIZE_MB * 1024 * 1024 / sizeof(char);
   char *buffer = (char *)malloc(buffer_size + 1);
   if (!buffer) {
@@ -132,7 +142,8 @@ int main(int argc, char *argv[]) {
 
     return EXIT_FAILURE;
   }
-
+  //заполняем буфер из файла и выполняем подсчёт количества включений искомого
+  //графа в тексте по частям
   size_t bytes_read;
   while (bytes_read = fread(buffer, sizeof(char), buffer_size, file)) {
     if (ferror(file)) {
@@ -148,17 +159,17 @@ int main(int argc, char *argv[]) {
 
     return EXIT_FAILURE;
   }
-
+  //Выводим резуьтат работы
   for (size_t i = 0; i < graphs_count; i++) {
     printf("%s : %lu\n", graphs[i]->key, graphs[i]->count);
   }
-
+  //Освобождаем память
   for (size_t i = 0; i < graphs_count; i++) {
     free_graph(graphs[i]);
   }
   free(graphs);
   free(buffer);
   free(file_path);
-
+  //Выход из программы, когда вся работа сделана. Должна вызываться один раз
   return EXIT_SUCCESS;
 }
