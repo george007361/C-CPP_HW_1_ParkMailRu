@@ -1,4 +1,4 @@
-#include "parallel_identif.h"
+#include "parallel_parser.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,6 +7,8 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
+
+#include "utils.h"
 
 enum {
   EXIT_OK,
@@ -25,18 +27,21 @@ int parse_using_digraph(unsigned long *count, const char *text,
     fprintf(
         stderr,
         "Error parse_using_digraph(): cant allocate memory for pids array\n");
+
     return EXIT_CANT_ALLOC_MEM;
   }
 
   char *ptr = text;
   size_t step = text_len / system_has_processors + 1;
+
   for (size_t i = 0; i < system_has_processors; i++) {
     part_pids[i] = fork();
     if (part_pids[i] == -1) {
-      printf(stderr,
-             "Error parse_using_digraph(): Cant fork to separate text and "
-             "count parallelly. %lu\n",
-             i);
+      fprintf(stderr,
+              "Error parse_using_digraph(): Cant fork to separate text and "
+              "count parallelly. %lu\n",
+              i);
+
       return EXIT_CANT_FORK;
     }
 
@@ -54,6 +59,7 @@ int parse_using_digraph(unsigned long *count, const char *text,
   }
 
   free(part_pids);
+
   return EXIT_OK;
 }
 
@@ -64,6 +70,7 @@ int parse_text(const char *text, const size_t text_len, Digraph **digraphs,
     fprintf(
         stderr,
         "Error parse_text(): cant allocate memory for digraphs pids array\n");
+
     return EXIT_CANT_ALLOC_MEM;
   }
 
@@ -73,24 +80,27 @@ int parse_text(const char *text, const size_t text_len, Digraph **digraphs,
   if (!count_arr_shared) {
     fprintf(stderr,
             "Error: parse_text(): Cant allocate memory for  shared memory\n");
+
     return EXIT_CANT_ALLOC_MEM;
   }
 
   for (size_t i = 0; i < digraphs_count; i++) {
     digraph_pids[i] = fork();
     if (digraph_pids[i] == -1) {
-      printf(
+      fprintf(
           stderr,
           "Error parse_text(): Cant fork to separate digraphs parsing. %lu\n",
           i);
+
       return EXIT_CANT_FORK;
     }
 
     if (!digraph_pids[i]) {
       // Считаем количество i-ого диграфа в тексте в отдельном процессе
-      sleep(2);
+      // sleep(2);
       parse_using_digraph(&count_arr_shared[i], text, text_len,
                           digraphs[i]->key);
+                          
       exit(EXIT_DIGRAPH_COUNTED_OK);
     }
   }
@@ -99,15 +109,20 @@ int parse_text(const char *text, const size_t text_len, Digraph **digraphs,
     while (waitpid(digraph_pids[i], NULL, 0) > 0)
       ;
   }
+
   for (size_t i = 0; i < digraphs_count; i++) {
-    printf("%lu ", count_arr_shared[i]);
+    digraphs[i]->count = count_arr_shared[i];
+    // printf("%lu ", count_arr_shared[i]);
   }
-  printf("ok! Enden\n");
+  // printf("ok! Enden\n");
+
   if (munmap(count_arr_shared, digraphs_count * sizeof(unsigned long))) {
-    sprintf(stderr, "Error parse_text(): Cannot unmap mem\n");
+    fprintf(stderr, "Error parse_text(): Cannot unmap mem\n");
+
     return EXIT_FAIL;
   }
 
   free(digraph_pids);
+
   return EXIT_OK;
 }
