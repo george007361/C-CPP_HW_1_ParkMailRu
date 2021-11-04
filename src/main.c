@@ -6,6 +6,7 @@
 
 #include "digraphs.h"
 #include "parallel_parser.h"
+// #include "serial_parser.h"
 
 enum {
   EXIT_OK,
@@ -21,7 +22,6 @@ enum {
 #define DEFAULT_MODE 1
 #define DATA_BUFF_SIZE_MB 100
 #define DIGRAPH_PTR_BUFF_SIZE 2
-#define BUFF_SIZE_MB 100
 
 int main(int argc, char *argv[]) {
   int opt = 0;
@@ -119,11 +119,11 @@ int main(int argc, char *argv[]) {
     return EXIT_NO_NEC_PARAMS;
   }
 
-  size_t buff_size = BUFF_SIZE_MB * 1024 * 1024 / sizeof(char);
+  size_t buff_size = DATA_BUFF_SIZE_MB * 1024 * 1024 / sizeof(char);
   char *buffer = (char *)malloc(buff_size);
   if (!buffer) {
     fprintf(stderr, "Error main(): cannot alloc buffer for %i Mb\n",
-            BUFF_SIZE_MB);
+            DATA_BUFF_SIZE_MB);
 
     return EXIT_FAILURE;
   }
@@ -136,15 +136,14 @@ int main(int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
 
-  fseek(file, 0, SEEK_END);
-  size_t f_real_len = ftell(file);
-  rewind(file);
-  buff_size = f_real_len > buff_size ? buff_size : f_real_len;
+  size_t bytes_read;
+  while (bytes_read = fread(buffer, sizeof(char), buff_size, file)) {
+    if (ferror(file)) {
+      fprintf(stderr, "Error main(): cant read file %s\n", file_path);
 
-  if (!fread(buffer, buff_size, sizeof(char), file)) {
-    fprintf(stderr, "Error main(): cant read file %s\n", file_path);
-
-    return EXIT_FAILURE;
+      return EXIT_FAILURE;
+    }
+    parse_text(buffer, bytes_read, digraphs, digraphs_count);
   }
 
   if (fclose(file)) {
@@ -152,10 +151,6 @@ int main(int argc, char *argv[]) {
 
     return EXIT_FAILURE;
   }
-
-  // puts(buffer);
-
-  parse_text(buffer, buff_size - 1, digraphs, digraphs_count);
 
   for (size_t i = 0; i < digraphs_count; i++) {
     printf("%s : %lu\n", digraphs[i]->key, digraphs[i]->count);

@@ -1,9 +1,9 @@
-build_local/
-.*/
-cmake-build-debug/
 build/
+build_local/
+cmake-build-debug/
+.*/
+data/
 errs.txt
 out.txt
 vlg.txt
 res.txt
-

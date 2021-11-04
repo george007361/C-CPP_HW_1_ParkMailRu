@@ -100,7 +100,7 @@ int parse_text(const char *text, const size_t text_len, Digraph **digraphs,
       // sleep(2);
       parse_using_digraph(&count_arr_shared[i], text, text_len,
                           digraphs[i]->key);
-                          
+
       exit(EXIT_DIGRAPH_COUNTED_OK);
     }
   }
@@ -110,11 +110,8 @@ int parse_text(const char *text, const size_t text_len, Digraph **digraphs,
       ;
   }
 
-  for (size_t i = 0; i < digraphs_count; i++) {
-    digraphs[i]->count = count_arr_shared[i];
-    // printf("%lu ", count_arr_shared[i]);
-  }
-  // printf("ok! Enden\n");
+  for (size_t i = 0; i < digraphs_count; i++)
+    digraphs[i]->count += count_arr_shared[i];
 
   if (munmap(count_arr_shared, digraphs_count * sizeof(unsigned long))) {
     fprintf(stderr, "Error parse_text(): Cannot unmap mem\n");
