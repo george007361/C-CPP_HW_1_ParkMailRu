@@ -1,6 +1,6 @@
-add_library(serial_parser src/serial_parser.c)
+add_library(parser src/serial_parser.c)
 
-target_include_directories(serial_parser PUBLIC include)
+target_include_directories(parser PUBLIC include)
 
-target_link_libraries(serial_parser PUBLIC digraphs)
-target_link_libraries(serial_parser PUBLIC utils)
+target_link_libraries(parser PUBLIC graphs)
+target_link_libraries(parser PUBLIC utils)

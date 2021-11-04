@@ -4,9 +4,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "digraphs.h"
-#include "parallel_parser.h"
-// #include "serial_parser.h"
+#include "graphs.h"
+#include "parser.h"
 
 enum {
   EXIT_OK,
@@ -14,14 +13,14 @@ enum {
   EXIT_NO_NEC_PARAMS,
   EXIT_INCOR_FILEPATH,
   EXIT_FOR_HELP,
-  EXIT_CANT_CR_DIGRAPH,
-  EXIT_CANT_SET_DIGRAPH,
+  EXIT_CANT_CR_GRAPH,
+  EXIT_CANT_SET_GRAPH,
   EXIT_CANT_MALLOC_MEM
 };
 
 #define DEFAULT_MODE 1
 #define DATA_BUFF_SIZE_MB 100
-#define DIGRAPH_PTR_BUFF_SIZE 2
+#define GRAPH_PTR_BUFF_SIZE 2
 
 int main(int argc, char *argv[]) {
   int opt = 0;
@@ -29,15 +28,14 @@ int main(int argc, char *argv[]) {
   char *file_path = 0;  //"./data/ex.txt";
   int fpath_added = 0;
   int mode = DEFAULT_MODE;
-  size_t digraphs_count = 0;
-  size_t digraphs_count_max = DIGRAPH_PTR_BUFF_SIZE;
-  Digraph **digraphs =
-      (Digraph **)malloc(digraphs_count_max * sizeof(Digraph *));
+  size_t graphs_count = 0;
+  size_t graphs_count_max = GRAPH_PTR_BUFF_SIZE;
+  Graph **graphs = (Graph **)malloc(graphs_count_max * sizeof(Graph *));
 
   static struct option longopt[] = {{"filepath", required_argument, 0, 'f'},
                                     {"mode", required_argument, 0, 'm'},
                                     {"help", no_argument, 0, 'h'},
-                                    {"digraph", required_argument, 0, 'd'}};
+                                    {"graph", required_argument, 0, 'd'}};
 
   while ((opt = getopt_long(argc, argv, "f:m:", longopt, &long_index)) != -1) {
     switch (opt) {
@@ -48,7 +46,7 @@ int main(int argc, char *argv[]) {
             "Usage:\n"
             "--mode <1 or 0>\n\t1 parallel\n\t0 sequential\n\tDefault: 1\n\n"
             "--filepath <path to data file>\n\tNECESSARY ARG\n\n"
-            "--digraph \"<Digraph name>\"\n\n"
+            "--graph \"<Graph name>\"\n\n"
             "--help for help\n\n");
 
         return EXIT_FOR_HELP;
@@ -78,32 +76,31 @@ int main(int argc, char *argv[]) {
       }
 
       case 'd': {
-        Digraph *new_digraph = create_digraph();
-        if (!new_digraph) return EXIT_CANT_CR_DIGRAPH;
-        if (!set_digraph(new_digraph, optarg, 0)) return EXIT_CANT_SET_DIGRAPH;
+        Graph *new_graph = create_graph();
+        if (!new_graph) return EXIT_CANT_CR_GRAPH;
+        if (!set_graph(new_graph, optarg, 0)) return EXIT_CANT_SET_GRAPH;
 
-        if (digraphs_count == digraphs_count_max) {
-          Digraph **new_digraphs =
-              (Digraph **)malloc(sizeof(Digraph *) * (digraphs_count_max *= 2));
+        if (graphs_count == graphs_count_max) {
+          Graph **new_graphs =
+              (Graph **)malloc(sizeof(Graph *) * (graphs_count_max *= 2));
 
-          if (!new_digraphs) {
-            free(digraphs);
+          if (!new_graphs) {
+            free(graphs);
             fprintf(stderr,
-                    "Error main(): Cant realloc mem for new digraphs array. "
+                    "Error main(): Cant realloc mem for new graphs array. "
                     "New size %lu\n",
-                    digraphs_count_max);
+                    graphs_count_max);
 
             return EXIT_CANT_MALLOC_MEM;
           }
 
-          for (size_t i = 0; i < digraphs_count; i++)
-            new_digraphs[i] = digraphs[i];
-          free(digraphs);
-          digraphs = new_digraphs;
+          for (size_t i = 0; i < graphs_count; i++) new_graphs[i] = graphs[i];
+          free(graphs);
+          graphs = new_graphs;
         }
 
-        digraphs[digraphs_count] = new_digraph;
-        digraphs_count++;
+        graphs[graphs_count] = new_graph;
+        graphs_count++;
 
         break;
       }
@@ -113,8 +110,8 @@ int main(int argc, char *argv[]) {
   if (!fpath_added) {
     printf(
         "There are not necessary args added. Use --help key for help\nFile "
-        "path: %d\n Digraphs added count: %lu\n\n",
-        fpath_added, digraphs_count);
+        "path: %d\n Graphs added count: %lu\n\n",
+        fpath_added, graphs_count);
 
     return EXIT_NO_NEC_PARAMS;
   }
@@ -143,7 +140,7 @@ int main(int argc, char *argv[]) {
 
       return EXIT_FAILURE;
     }
-    parse_text(buffer, bytes_read, digraphs, digraphs_count);
+    parse_text(buffer, bytes_read, graphs, graphs_count);
   }
 
   if (fclose(file)) {
@@ -152,14 +149,14 @@ int main(int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
 
-  for (size_t i = 0; i < digraphs_count; i++) {
-    printf("%s : %lu\n", digraphs[i]->key, digraphs[i]->count);
+  for (size_t i = 0; i < graphs_count; i++) {
+    printf("%s : %lu\n", graphs[i]->key, graphs[i]->count);
   }
 
-  for (size_t i = 0; i < digraphs_count; i++) {
-    free_digraph(digraphs[i]);
+  for (size_t i = 0; i < graphs_count; i++) {
+    free_graph(graphs[i]);
   }
-  free(digraphs);
+  free(graphs);
   free(buffer);
   free(file_path);
 
