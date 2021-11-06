@@ -67,6 +67,8 @@ Graph *clear_graph(Graph *graph) {
   }
 
   if (graph->key) free(graph->key);
+  graph->key = NULL;
+
   graph->count = 0;
 
   return graph;

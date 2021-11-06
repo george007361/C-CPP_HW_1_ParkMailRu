@@ -14,11 +14,19 @@ enum {
   EXIT_FAIL,
   EXIT_GRAPH_COUNTED_OK,
   EXIT_CANT_ALLOC_MEM,
-  EXIT_CANT_FORK
+  EXIT_CANT_FORK,
+  EXIT_NULL_TEXT,
+  EXIT_NULL_GRAPHS,
+  EXIT_NULL_KEY
 };
 
 int parse_using_graph(unsigned long *count, const char *text,
                       const size_t text_len, const char *key) {
+  if (!key) {
+    fprintf(stderr, "Error: parse_text null ptr key\n");
+    return EXIT_NULL_KEY;
+  }
+
   long system_has_processors = sysconf(_SC_NPROCESSORS_ONLN);
 
   pid_t *part_pids = (pid_t *)malloc(system_has_processors * sizeof(pid_t));
@@ -64,6 +72,17 @@ int parse_using_graph(unsigned long *count, const char *text,
 int parse_text(const char *text, const size_t text_len, Graph **graphs,
                const size_t graphs_count) {
   // printf("Using parallel parser...\n");
+  // Проверяем входные данные
+  if (!text) {
+    fprintf(stderr, "Error: parse_text null ptr text\n");
+
+    return EXIT_NULL_TEXT;
+  }
+  if (!graphs) {
+    fprintf(stderr, "Error: parse_text null ptr graphs\n");
+
+    return EXIT_NULL_GRAPHS;
+  }
   //Выделяем массив для хранения pid дочерних
   pid_t *graph_pids = (pid_t *)malloc(graphs_count * sizeof(pid_t));
   if (!graph_pids) {
@@ -82,8 +101,9 @@ int parse_text(const char *text, const size_t text_len, Graph **graphs,
 
     return EXIT_CANT_ALLOC_MEM;
   }
-//Вычисляем количесто каждого графа(он же искомая подстрока) в тексте
+  //Вычисляем количесто каждого графа(он же искомая подстрока) в тексте
   for (size_t i = 0; i < graphs_count; i++) {
+    fflush(stdout);
     graph_pids[i] = fork();  // отделяем подсчёт i-ой подстроки в отдельный
                              // процесс, сохраняем его pid в массив
     if (graph_pids[i] == -1) {
@@ -99,8 +119,8 @@ int parse_text(const char *text, const size_t text_len, Graph **graphs,
       // тексте в отдельном процессе с помощью функции parse_using_graph, пока
       // закомментил, тк там аналогичная проблема
 
-      // parse_using_graph(&count_arr_shared[i], text, text_len,
-      // graphs[i]->key);
+      parse_using_graph(&count_arr_shared[i], text, text_len,
+      graphs[i]->key);
 
       exit(EXIT_GRAPH_COUNTED_OK);
     } else {
@@ -115,7 +135,7 @@ int parse_text(const char *text, const size_t text_len, Graph **graphs,
     while (waitpid(graph_pids[i], NULL, 0) > 0)
       ;
   }
-// Переносим данные из общей области на свои места
+  // Переносим данные из общей области на свои места
   for (size_t i = 0; i < graphs_count; i++)
     graphs[i]->count += count_arr_shared[i];
 
@@ -126,6 +146,7 @@ int parse_text(const char *text, const size_t text_len, Graph **graphs,
   }
 
   free(graph_pids);
-  // Выходим, когда всё посчитали и можно давать ответ в main. Должна вызваться один раз.
+  // Выходим, когда всё посчитали и можно давать ответ в main. Должна вызваться
+  // один раз.
   return EXIT_OK;
 }

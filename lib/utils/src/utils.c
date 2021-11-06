@@ -1,9 +1,21 @@
 #include "utils.h"
 
+#include <stdio.h>
 #include <string.h>
+
+enum { EXIT_OK, EXIT_FAILURE };
 
 unsigned long counter_simple(const char *array, const size_t len,
                              const char *key) {
+  if (!array) {
+    fprintf(stderr,
+            "Error counter_simple(): array ptr os null.\n");
+    return NULL;
+  }
+  if (!array) {
+    fprintf(stderr, "Error counter_simple(): key ptr os null.\n");
+    return NULL;
+  }
   unsigned long count = 0;
   size_t step = strlen(key);
 

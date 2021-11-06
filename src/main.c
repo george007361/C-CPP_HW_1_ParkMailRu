@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "graphs.h"
@@ -23,8 +24,8 @@ enum {
 #define GRAPH_PTR_BUFF_SIZE 1
 
 int main(int argc, char *argv[]) {
-  printf(
-      "First stroke in main()\n");  // Вот эта строка должна вызываться один
+  // printf(
+      // "First stroke in main()\n");  // Вот эта строка должна вызываться один
                                     // раз, то есть при запуске программы. Но
                                     // отлаживая код и выводе в файл результата
                                     // через ./build/main --filepath
@@ -32,7 +33,7 @@ int main(int argc, char *argv[]) {
                                     // заметил, что почему то эта строка
                                     // выполняется много раз, видимо столько же,
                                     // сколько процессов насоздавал.
-  //Выделяем переменные для парсинка аргументов
+  //Выделяем переменные для парсинка аргументов,
   int opt = 0;
   int long_index = 0;
   char *file_path = 0;  //"./data/ex.txt";
@@ -122,7 +123,8 @@ int main(int argc, char *argv[]) {
         "There are not necessary args added. Use --help key for help\nFile "
         "path: %d\n Graphs added count: %lu\n\n",
         fpath_added, graphs_count);
-
+        free(graphs);
+        
     return EXIT_NO_NEC_PARAMS;
   }
   // Выделяем буфер заданного размера
@@ -142,9 +144,12 @@ int main(int argc, char *argv[]) {
 
     return EXIT_FAILURE;
   }
+
+  struct timespec start_time, end_time;
   //заполняем буфер из файла и выполняем подсчёт количества включений искомого
   //графа в тексте по частям
   size_t bytes_read;
+  clock_gettime(CLOCK_REALTIME, &start_time);
   while (bytes_read = fread(buffer, sizeof(char), buffer_size, file)) {
     if (ferror(file)) {
       fprintf(stderr, "Error main(): cant read file %s\n", file_path);
@@ -153,6 +158,7 @@ int main(int argc, char *argv[]) {
     }
     parse_text(buffer, bytes_read, graphs, graphs_count);
   }
+  clock_gettime(CLOCK_REALTIME, &end_time);
 
   if (fclose(file)) {
     fprintf(stderr, "Error: can't close file %s\n", file_path);
@@ -163,6 +169,12 @@ int main(int argc, char *argv[]) {
   for (size_t i = 0; i < graphs_count; i++) {
     printf("%s : %lu\n", graphs[i]->key, graphs[i]->count);
   }
+  long processing_time =
+      (end_time.tv_sec -
+       start_time.tv_sec);  //+(end_time.tv_nsec - start_time.tv_nsec);
+  //Выводим результат расчета времени на экран
+  printf("\nTime: %ld s\n", processing_time);
+
   //Освобождаем память
   for (size_t i = 0; i < graphs_count; i++) {
     free_graph(graphs[i]);
