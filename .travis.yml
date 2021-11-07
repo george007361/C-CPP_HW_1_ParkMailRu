@@ -7,21 +7,10 @@ install:
  - sudo apt-get install --yes libgtest-dev
  - sudo apt-get install --yes gcovr
  - sudo apt-get install --yes clang-tools 
+ - sudo apt-get install --yes valgrind
 
 jobs:
  include:
-  - stage: Sanitizers
-    script:
-     - cmake -B build -DUSE_SERIAL=0 -DWITH_SANITIZERS=1
-     - make -C build
-     - echo "----------PARALLEL_PARSER-------------"
-     - echo "----------ALL OK-------------"
-     - ./build/main --filepath ./data/ex.txt --graph ":)" --graph ":("
-     - cmake -B build -DUSE_SERIAL=1 -DWITH_SANITIZERS=1
-     - make -C build
-     - echo "----------PARALLEL_PARSER-------------"
-     - echo "----------ALL OK-------------"
-     - ./build/main --filepath ./data/ex.txt --graph ":)" --graph ":("
   - stage: Valgrind
     script:
      - cmake -B build -DUSE_SERIAL=0
@@ -74,4 +63,17 @@ jobs:
      - curl -Os https://uploader.codecov.io/latest/linux/codecov
      - chmod +x codecov
      - ./codecov -f <(gcovr -e '.*/tests/.*' -x)
+
+  - stage: Sanitizers
+    script:
+     - cmake -B build -DUSE_SERIAL=0 -DWITH_SANITIZERS=1
+     - make -C build
+     - echo "----------PARALLEL_PARSER-------------"
+     - echo "----------ALL OK-------------"
+     - ./build/main --filepath ./data/ex.txt --graph ":)" --graph ":("
+     - cmake -B build -DUSE_SERIAL=1 -DWITH_SANITIZERS=1
+     - make -C build
+     - echo "----------PARALLEL_PARSER-------------"
+     - echo "----------ALL OK-------------"
+     - ./build/main --filepath ./data/ex.txt --graph ":)" --graph ":("
      
