@@ -15,7 +15,6 @@ Graph *set_graph_count(Graph *graph, const unsigned long count);
 Graph *clear_graph(Graph *graph);
 void free_graph(Graph *graph);
 void free_graphs(Graph ***graphs, size_t *graphs_count);
-int interprier(long *delta, Graph **graphs,
-               const size_t graphs_count, const char *key_better,
-               const char *key_worse);
+int interprier(long *delta, Graph **graphs, const size_t graphs_count,
+               const char *key_better, const char *key_worse);
 #endif  // !ALGS_H

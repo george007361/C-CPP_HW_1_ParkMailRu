@@ -8,7 +8,6 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_compile_options(-Wall -Wextra -pedantic -fPIC)
-
 set(BUILD_TESTS OFF)
 option(TEST_GRAPHS "Enable graphs library test" OFF)
 option(TEST_PARSER "Enable parser library test" OFF)
