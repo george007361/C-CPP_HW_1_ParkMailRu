@@ -1,3 +1,4 @@
+// / <copyright>© George Illarionov 2021. All rights ignored</copyright>
 #include "gtest/gtest.h"
 
 extern "C" {

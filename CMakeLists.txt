@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.12)
 
 project(DigraphsAnalyser)
 
+include_directories(${CMAKE_SOURCE_DIR})
+
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDART_REQURED ON)
 set(CMAKE_CXX_STANDARD 11)

@@ -1,3 +1,4 @@
+// / <copyright>© George Illarionov 2021. All rights ignored</copyright>
 #include "graphs.h"
 
 #include <stdio.h>
