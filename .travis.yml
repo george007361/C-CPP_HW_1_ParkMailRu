@@ -20,9 +20,9 @@ jobs:
      - echo "----------EMPTY GRAPHS-------------"
      - ./build/main --filepath ./data/ex.txt
      - echo "----------EMPTY FILEPATH-------------"
-     - ./build/main --graphs ":)" --graphs ":("
+     - ./build/main --graph ":)" --graph ":("
      - echo "----------ALL OK-------------"
-     - ./build/main --filepath ./data/ex.txt --graphs ":)" --graphs ":("
+     - ./build/main --filepath ./data/ex.txt --graph ":)" --graph ":("
      - cmake -B build -DUSE_SERIAL=1 -DWITH_SANITIZERS=1
      - make -C build
      - echo "----------PARALLEL_PARSER-------------"
@@ -31,9 +31,9 @@ jobs:
      - echo "----------EMPTY GRAPHS-------------"
      - ./build/main --filepath ./data/ex.txt
      - echo "----------EMPTY FILEPATH-------------"
-     - ./build/main --graphs ":)" --graphs ":("
+     - ./build/main --graph ":)" --graph ":("
      - echo "----------ALL OK-------------"
-     - ./build/main --filepath ./data/ex.txt --graphs ":)" --graphs ":("
+     - ./build/main --filepath ./data/ex.txt --graph ":)" --graph ":("
   - stage: Valgrind
     script:
      - cmake -B build -DUSE_SERIAL=0
@@ -44,9 +44,9 @@ jobs:
      - echo "----------EMPTY GRAPHS-------------"
      - valgrind ./build/main --filepath ./data/ex.txt
      - echo "----------EMPTY FILEPATH-------------"
-     - valgrind ./build/main --graphs ":)" --graphs ":("
+     - valgrind ./build/main --graph ":)" --graph ":("
      - echo "----------ALL OK-------------"
-     - valgrind ./build/main --filepath ./data/ex.txt --graphs ":)" --graphs ":("
+     - valgrind ./build/main --filepath ./data/ex.txt --graph ":)" --graph ":("
      - cmake -B build -DUSE_SERIAL=1
      - make -C build
      - echo "----------PARALLEL_PARSER-------------"
@@ -55,9 +55,9 @@ jobs:
      - echo "----------EMPTY GRAPHS-------------"
      - valgrind ./build/main --filepath ./data/ex.txt
      - echo "----------EMPTY FILEPATH-------------"
-     - valgrind ./build/main --graphs ":)" --graphs ":("
+     - valgrind ./build/main --graph ":)" --graph ":("
      - echo "----------ALL OK-------------"
-     - valgrind ./build/main --filepath ./data/ex.txt --graphs ":)" --graphs ":("
+     - valgrind ./build/main --filepath ./data/ex.txt --graph ":)" --graph ":("
   - stage: clang-format
     script:
      - find ./ -path ./gtest -prune -iname *.c -o -iname *.h -o -iname *.cpp | xargs clang-format -dry-run -style=Google

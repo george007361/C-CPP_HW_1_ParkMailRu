@@ -40,6 +40,10 @@ int main(int argc, char *argv[]) {
   while ((opt = getopt_long(argc, argv, "f:m:", longopt, &long_index)) != -1) {
     switch (opt) {
       default:
+      {
+        free_graphs(&graphs, &graphs_count);
+        free(file_path);
+      }
 
       case 'h': {
         printf(
@@ -53,6 +57,8 @@ int main(int argc, char *argv[]) {
 
       case 'f': {
         file_path = realpath(optarg, NULL);
+        // file_path = (char *)malloc(sizeof(char) * strlen(optarg));
+        // for (size_t i = 0; i < strlen(optarg); i++) file_path[i] = optarg[i];
 
         if (file_path) {
           fpath_added = 1;
@@ -105,7 +111,11 @@ int main(int argc, char *argv[]) {
         "There are not necessary args added. Use --help key for help\nFile "
         "Path to data file: %d\nGraphs added count: %lu\n\n",
         fpath_added, graphs_count);
-    free_graphs(&graphs, &graphs_count);
+    for (size_t i = 0; i < graphs_count; i++) {
+      free_graph(graphs[i]);
+    }
+    free(graphs);
+    // free_graphs(&graphs, &graphs_count);
     free(file_path);
 
     return EXIT_NO_NEC_PARAMS;
