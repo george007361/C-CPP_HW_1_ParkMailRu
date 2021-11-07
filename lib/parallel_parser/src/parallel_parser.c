@@ -98,6 +98,7 @@ int parse_text(const char *text, const size_t text_len, Graph **graphs,
   if (!count_arr_shared) {
     fprintf(stderr,
             "Error: parse_text(): Cant allocate memory for  shared memory\n");
+    free(graph_pids);
 
     return EXIT_CANT_ALLOC_MEM;
   }
@@ -110,6 +111,12 @@ int parse_text(const char *text, const size_t text_len, Graph **graphs,
       fprintf(stderr,
               "Error parse_text(): Cant fork to separate graphs parsing. %lu\n",
               i);
+      free(graph_pids);
+      if (munmap(count_arr_shared, graphs_count * sizeof(unsigned long))) {
+        fprintf(stderr, "Error parse_text(): Cannot unmap mem\n");
+
+        return EXIT_FAIL;
+      }
 
       return EXIT_CANT_FORK;
     }
@@ -119,8 +126,7 @@ int parse_text(const char *text, const size_t text_len, Graph **graphs,
       // тексте в отдельном процессе с помощью функции parse_using_graph, пока
       // закомментил, тк там аналогичная проблема
 
-      parse_using_graph(&count_arr_shared[i], text, text_len,
-      graphs[i]->key);
+      parse_using_graph(&count_arr_shared[i], text, text_len, graphs[i]->key);
 
       exit(EXIT_GRAPH_COUNTED_OK);
     } else {

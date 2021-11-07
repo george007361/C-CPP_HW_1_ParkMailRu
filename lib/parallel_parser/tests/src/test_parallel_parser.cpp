@@ -19,7 +19,7 @@ TEST(parallel_parser, parallel_parser_all_args_ok) {
     test_graphs[1] = create_graph();
     set_graph(test_graphs[0], "test_key1", 0);
     set_graph(test_graphs[1], "test_key2", 0);
-    char *text = "la-la-la test_key1 test_key2";
+    const char text[] = "la-la-la test_key1 test_key2";
     
     EXPECT_EQ(parse_text(text, strlen(text), test_graphs, 2), 0);
     EXPECT_EQ(test_graphs[0]->count, 1);

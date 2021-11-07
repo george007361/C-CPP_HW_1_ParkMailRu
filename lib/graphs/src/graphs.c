@@ -78,3 +78,37 @@ void free_graph(Graph *graph) {
   clear_graph(graph);
   free(graph);
 }
+
+void free_graphs(Graph ***graphs, size_t *graphs_count) {
+  for (size_t i = 0; i < *graphs_count; i++) free_graph((*graphs)[i]);
+  free(*graphs);
+  *graphs_count = 0;
+  *graphs = NULL;
+}
+
+int interprier(long *delta, Graph **graphs, const size_t graphs_count,
+               const char *key_better, const char *key_worse) {
+  unsigned long count_better = 0, count_worse = 0;
+  if (!graphs) {
+    fprintf(stderr, "Error interprier(): Empty graphs array \n");
+
+    return EXIT_FAILURE;
+  }
+  if (!key_better || !key_worse) {
+    fprintf(stderr, "Error interprier(): Empty key\n");
+
+    return EXIT_FAILURE;
+  }
+  if (!delta) {
+    fprintf(stderr, "Error interprier(): null ptr delta\n");
+
+    return EXIT_FAILURE;
+  }
+  for (size_t i = 0; i < graphs_count; i++) {
+    if (!strcmp(graphs[i]->key, key_better)) count_better = graphs[i]->count;
+    if (!strcmp(graphs[i]->key, key_worse)) count_worse = graphs[i]->count;
+  }
+  *delta = count_better - count_worse;
+
+  return EXIT_SUCCESS;
+}
