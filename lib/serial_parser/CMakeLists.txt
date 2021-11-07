@@ -6,5 +6,5 @@ target_link_libraries(parser PUBLIC graphs)
 target_link_libraries(parser PUBLIC utils)
 
 if(TEST_PARSER)
-    add_subdirectory(tests)
+    add_subdirectory(/tests)
 endif()

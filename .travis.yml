@@ -10,31 +10,6 @@ install:
 
 jobs:
  include:
-  - stage: Build
-    script:
-     - cmake -B build
-     - make -C build
-  - stage: GTest
-    script:
-     - cmake -B build -DUSE_SERIAL=0 -DTEST_PARSER=1
-     - make -C build
-     - make -C build test_parser
-     - ./build/lib/parallel_parser/tests/test_parser
-     - cmake -B build -DUSE_SERIAL=1 -DTEST_ALL=1
-     - make -C build
-     - make -C build test_parser
-     - ./build/lib/serial_parser/tests/test_parser
-     - make -C build test_graphs
-     - ./build/lib/graphs/tests/test_graphs
-  - stage: Coverage
-    script:
-     - cmake -B build -DUSE_SERIAL=1 -DWITH_COVERAGE=1
-     - make -C build
-     - cmake -B build -DUSE_SERIAL=0 -DWITH_COVERAGE=1
-     - make -C build
-     - curl -Os https://uploader.codecov.io/latest/linux/codecov
-     - chmod +x codecov
-     - ./codecov -f <(gcovr -e '.*/tests/.*' -x)
   - stage: Sanitizers
     script:
      - cmake -B build -DUSE_SERIAL=0 -DWITH_SANITIZERS=1
@@ -98,4 +73,29 @@ jobs:
      - scan-build make -C build
      - cmake -B build -DUSE_SERIAL=1
      - scan-build make -C build
+  - stage: Build
+    script:
+     - cmake -B build
+     - make -C build
+  - stage: GTest
+    script:
+     - cmake -B build -DUSE_SERIAL=0 -DTEST_PARSER=1
+     - make -C build
+     - make -C build test_parser
+     - ./build/lib/parallel_parser/tests/test_parser
+     - cmake -B build -DUSE_SERIAL=1 -DTEST_ALL=1
+     - make -C build
+     - make -C build test_parser
+     - ./build/lib/serial_parser/tests/test_parser
+     - make -C build test_graphs
+     - ./build/lib/graphs/tests/test_graphs
+  - stage: Coverage
+    script:
+     - cmake -B build -DUSE_SERIAL=1 -DWITH_COVERAGE=1
+     - make -C build
+     - cmake -B build -DUSE_SERIAL=0 -DWITH_COVERAGE=1
+     - make -C build
+     - curl -Os https://uploader.codecov.io/latest/linux/codecov
+     - chmod +x codecov
+     - ./codecov -f <(gcovr -e '.*/tests/.*' -x)
      
