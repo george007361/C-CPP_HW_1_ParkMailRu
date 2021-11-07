@@ -1,0 +1,101 @@
+os: linux
+dist: focal
+language: cpp
+
+install:
+ - sudo apt-get update
+ - sudo apt-get install --yes libgtest-dev
+ - sudo apt-get install --yes gcovr
+ - sudo apt-get install --yes clang-tools 
+
+jobs:
+ include:
+  - stage: Build
+    script:
+     - cmake -B build
+     - make -C build
+  - stage: GTest
+    script:
+     - cmake -B build -DUSE_SERIAL=0 -DTEST_PARSER=1
+     - make -C build
+     - make -C build test_parser
+     - ./build/lib/parallel_parser/tests/test_parser
+     - cmake -B build -DUSE_SERIAL=1 -DTEST_ALL=1
+     - make -C build
+     - make -C build test_parser
+     - ./build/lib/serial_parser/tests/test_parser
+     - make -C build test_graphs
+     - ./build/lib/graphs/tests/test_graphs
+  - stage: Coverage
+    script:
+     - cmake -B build -DUSE_SERIAL=1 -DWITH_COVERAGE=1
+     - make -C build
+     - cmake -B build -DUSE_SERIAL=0 -DWITH_COVERAGE=1
+     - make -C build
+     - curl -Os https://uploader.codecov.io/latest/linux/codecov
+     - chmod +x codecov
+     - ./codecov -f <(gcovr -e '.*/tests/.*' -x)
+  - stage: Sanitizers
+    script:
+     - cmake -B build -DUSE_SERIAL=0 -DWITH_SANITIZERS=1
+     - make -C build
+     - echo "----------PARALLEL_PARSER-------------"
+     - echo "----------EMPTY ARGS-------------"
+     - ./build/main 
+     - echo "----------EMPTY GRAPHS-------------"
+     - ./build/main --filepath ./data/ex.txt
+     - echo "----------EMPTY FILEPATH-------------"
+     - ./build/main --graphs ":)" --graphs ":("
+     - echo "----------ALL OK-------------"
+     - ./build/main --filepath ./data/ex.txt --graphs ":)" --graphs ":("
+     - cmake -B build -DUSE_SERIAL=1 -DWITH_SANITIZERS=1
+     - make -C build
+     - echo "----------PARALLEL_PARSER-------------"
+     - echo "----------EMPTY ARGS-------------"
+     - ./build/main 
+     - echo "----------EMPTY GRAPHS-------------"
+     - ./build/main --filepath ./data/ex.txt
+     - echo "----------EMPTY FILEPATH-------------"
+     - ./build/main --graphs ":)" --graphs ":("
+     - echo "----------ALL OK-------------"
+     - ./build/main --filepath ./data/ex.txt --graphs ":)" --graphs ":("
+  - stage: Valgrind
+    script:
+     - cmake -B build -DUSE_SERIAL=0
+     - make -C build
+     - echo "----------PARALLEL_PARSER-------------"
+     - echo "----------EMPTY ARGS-------------"
+     - valgrind ./build/main 
+     - echo "----------EMPTY GRAPHS-------------"
+     - valgrind ./build/main --filepath ./data/ex.txt
+     - echo "----------EMPTY FILEPATH-------------"
+     - valgrind ./build/main --graphs ":)" --graphs ":("
+     - echo "----------ALL OK-------------"
+     - valgrind ./build/main --filepath ./data/ex.txt --graphs ":)" --graphs ":("
+     - cmake -B build -DUSE_SERIAL=1
+     - make -C build
+     - echo "----------PARALLEL_PARSER-------------"
+     - echo "----------EMPTY ARGS-------------"
+     - valgrind ./build/main 
+     - echo "----------EMPTY GRAPHS-------------"
+     - valgrind ./build/main --filepath ./data/ex.txt
+     - echo "----------EMPTY FILEPATH-------------"
+     - valgrind ./build/main --graphs ":)" --graphs ":("
+     - echo "----------ALL OK-------------"
+     - valgrind ./build/main --filepath ./data/ex.txt --graphs ":)" --graphs ":("
+  - stage: clang-format
+    script:
+     - find ./ -path ./gtest -prune -iname *.c -o -iname *.h -o -iname *.cpp | xargs clang-format -dry-run -style=Google
+  - stage: cpplint
+    script:
+     - find ./ -path ./gtest -prune -iname *.c -o -iname *.cpp -o -iname *.h | xargs cpplint
+  - stage: cppcheck
+    script:
+     - find ./ -path ./gtest -prune -iname *.c -o -iname *.cpp -o -iname *.h | xargs cppcheck --enable=warning,performance,portability 
+  - stage: scan-build
+    script:
+     - cmake -B build -DUSE_SERIAL=0
+     - scan-build make -C build
+     - cmake -B build -DUSE_SERIAL=1
+     - scan-build make -C build
+     
