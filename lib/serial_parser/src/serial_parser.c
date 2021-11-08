@@ -7,8 +7,8 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#include "include/parser.h"
-#include "include/utils.h"
+#include "parser.h"
+#include "utils.h"
 
 enum {
   EXIT_OK,

@@ -2,7 +2,7 @@
 #include "gtest/gtest.h"
 
 extern "C" {
-#include "include/graphs.h"
+#include "graphs.h"
 }
 
 int main(int argc, char **argv) {
