@@ -9,6 +9,8 @@ install:
 jobs:
  include:
   - stage: cpplint
+    before_script:
+     - sudo pip install cpplint
     script:
     #  - find $TRAVIS_BUILD_DIR/ -name "gtest" -prune -name "*.c" -o -name "*.h" -o -name "*.cpp"
      - cpplint $TRAVIS_BUILD_DIR/lib/graphs/include/graphs.h
