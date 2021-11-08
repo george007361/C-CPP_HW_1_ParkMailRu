@@ -11,27 +11,15 @@ install:
 
 jobs:
  include:
-  - stage: Valgrind
-    script:
-     - cmake -B build -DUSE_SERIAL=0
-     - make -C build
-     - echo "----------PARALLEL_PARSER-------------"
-     - echo "----------ALL OK-------------"
-     - valgrind ./build/main --filepath ./data/ex.txt --graph ":)" --graph ":("
-     - cmake -B build -DUSE_SERIAL=1
-     - make -C build
-     - echo "----------PARALLEL_PARSER-------------"
-     - echo "----------ALL OK-------------"
-     - valgrind ./build/main --filepath ./data/ex.txt --graph ":)" --graph ":("
   - stage: clang-format
     script:
-     - find ./ -path ./gtest -prune -iname *.c -o -iname *.h -o -iname *.cpp | xargs clang-format -dry-run -style=Google
+     - find . -name "gtest" -prune -iname *.c -o -iname *.h -o -iname *.cpp | xargs clang-format -dry-run -style=Google
   - stage: cpplint
     script:
-     - find ./ -path ./gtest -prune -iname *.c -o -iname *.cpp -o -iname *.h | xargs cpplint
+     - find ./ -name "gtest" -prune -iname *.c -o -iname *.cpp -o -iname *.h | xargs cpplint
   - stage: cppcheck
     script:
-     - find ./ -path ./gtest -prune -iname *.c -o -iname *.cpp -o -iname *.h | xargs cppcheck --enable=warning,performance,portability 
+     - find ./ -name "gtest" -prune -iname *.c -o -iname *.cpp -o -iname *.h | xargs cppcheck --enable=warning,performance,portability 
   - stage: scan-build
     script:
      - cmake -B build -DUSE_SERIAL=0
@@ -76,4 +64,17 @@ jobs:
      - echo "----------PARALLEL_PARSER-------------"
      - echo "----------ALL OK-------------"
      - ./build/main --filepath ./data/ex.txt --graph ":)" --graph ":("
+
+  - stage: Valgrind
+    script:
+     - cmake -B build -DUSE_SERIAL=0
+     - make -C build
+     - echo "----------PARALLEL_PARSER-------------"
+     - echo "----------ALL OK-------------"
+     - valgrind ./build/main --filepath ./data/ex.txt --graph ":)" --graph ":("
+     - cmake -B build -DUSE_SERIAL=1
+     - make -C build
+     - echo "----------PARALLEL_PARSER-------------"
+     - echo "----------ALL OK-------------"
+     - valgrind ./build/main --filepath ./data/ex.txt --graph ":)" --graph ":("
      
