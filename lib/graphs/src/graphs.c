@@ -81,6 +81,8 @@ void free_graph(Graph *graph) {
 }
 
 void free_graphs(Graph ***graphs, size_t *graphs_count) {
+  if (!graphs) return;
+  if (!(*graphs)) return;
   for (size_t i = 0; i < *graphs_count; i++) free_graph((*graphs)[i]);
   free(*graphs);
   *graphs = NULL;

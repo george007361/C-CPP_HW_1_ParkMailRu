@@ -35,9 +35,10 @@ int main(int argc, char *argv[]) {
 
   static struct option longopt[] = {{"filepath", required_argument, 0, 'f'},
                                     {"help", no_argument, 0, 'h'},
-                                    {"graph", required_argument, 0, 'd'}};
+                                    {"graph", required_argument, 0, 'd'},
+                                    {NULL, 0, 0, 0}};
   // Парсим аргументы
-  while ((opt = getopt_long(argc, argv, "f:m:", longopt, &long_index)) != -1) {
+  while ((opt = getopt_long(argc, argv, "f: m:", longopt, &long_index)) != -1) {
     switch (opt) {
       default: {
         free_graphs(&graphs, &graphs_count);
@@ -187,9 +188,10 @@ int main(int argc, char *argv[]) {
     else
       printf(
           "Cannot understand. Count of :) and :( graphs matches or not found "
-          "in text\n");
+          "in text\n\n");
   } else {
-    fprintf(stderr, "Error interprier() in main(): cant interpritate result\n");
+    fprintf(stderr,
+            "Error interprier() in main(): cant interpritate result\n\n");
   }
   // Освобождаем память
   free_graphs(&graphs, &graphs_count);
