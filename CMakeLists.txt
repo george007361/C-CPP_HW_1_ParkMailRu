@@ -15,7 +15,7 @@ option(TEST_GRAPHS "Enable graphs library test" OFF)
 option(TEST_PARSER "Enable parser library test" OFF)
 option(TEST_ALL "Enable all tests" OFF)
 option(WITH_COVERAGE "Add coverage estimation")
-option(WITH_SANITIZERS "Add address sanitizer")
+option(WITH_SANITIZERS "Add sanitizers")
 
 if(WITH_COVERAGE)
     set(BUILD_TESTS ON)

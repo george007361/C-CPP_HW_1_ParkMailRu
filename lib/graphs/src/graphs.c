@@ -83,8 +83,8 @@ void free_graph(Graph *graph) {
 void free_graphs(Graph ***graphs, size_t *graphs_count) {
   for (size_t i = 0; i < *graphs_count; i++) free_graph((*graphs)[i]);
   free(*graphs);
-  *graphs_count = 0;
   *graphs = NULL;
+  *graphs_count = 0;
 }
 
 int interprier(long *delta, Graph **graphs, const size_t graphs_count,

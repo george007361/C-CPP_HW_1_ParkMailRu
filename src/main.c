@@ -39,8 +39,7 @@ int main(int argc, char *argv[]) {
   // Парсим аргументы
   while ((opt = getopt_long(argc, argv, "f:m:", longopt, &long_index)) != -1) {
     switch (opt) {
-      default:
-      {
+      default: {
         free_graphs(&graphs, &graphs_count);
         free(file_path);
       }
@@ -111,10 +110,7 @@ int main(int argc, char *argv[]) {
         "There are not necessary args added. Use --help key for help\nFile "
         "Path to data file: %d\nGraphs added count: %lu\n\n",
         fpath_added, graphs_count);
-    for (size_t i = 0; i < graphs_count; i++) {
-      free_graph(graphs[i]);
-    }
-    free(graphs);
+    free_graphs(&graphs, &graphs_count);
     // free_graphs(&graphs, &graphs_count);
     free(file_path);
 
@@ -150,7 +146,7 @@ int main(int argc, char *argv[]) {
   while ((bytes_read = fread(buffer, sizeof(char), buffer_size, file)) > 0) {
     if (ferror(file)) {
       fprintf(stderr, "Error main(): cant read file %s\n", file_path);
-      free_graphs(graphs, graphs_count);
+      free_graphs(&graphs, &graphs_count);
       free(file_path);
       free(buffer);
 
