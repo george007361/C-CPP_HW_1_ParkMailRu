@@ -2,6 +2,8 @@
 #ifndef LIB_PARALLEL_PARSER_INCLUDE_PARSER_H_
 #define LIB_PARALLEL_PARSER_INCLUDE_PARSER_H_
 
+#define PART_MIN_LEN_MB 20
+
 #include <stdlib.h>
 
 #include "graphs.h"
