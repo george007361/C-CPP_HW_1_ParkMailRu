@@ -12,14 +12,14 @@ jobs:
     before_script:
      - sudo pip install cpplint
     script:
-    #  - find $TRAVIS_BUILD_DIR/ -name "gtest" -prune -name "*.c" -o -name "*.h" -o -name "*.cpp"
-     - cpplint $TRAVIS_BUILD_DIR/lib/graphs/include/graphs.h
-     - cpplint $TRAVIS_BUILD_DIR/lib/graphs/tests/src/test_graphs.cpp
-     - cpplint $TRAVIS_BUILD_DIR/lib/parallel_parser/include/parser.h
-     - cpplint $TRAVIS_BUILD_DIR/lib/parallel_parser/tests/src/test_parallel_parser.cpp
-     - cpplint $TRAVIS_BUILD_DIR/lib/serial_parser/include/parser.h
-     - cpplint $TRAVIS_BUILD_DIR/lib/serial_parser/tests/src/test_serial_parser.cpp
-     - cpplint $TRAVIS_BUILD_DIR/lib/utils/include/utils.h
+     - find $TRAVIS_BUILD_DIR/ -name "gtest" -prune -name "*.c" -o -name "*.h" -o -name "*.cpp" | xargs cpplint --filter=-runtime/int,-readability/casting
+    #  - cpplint $TRAVIS_BUILD_DIR/lib/graphs/include/graphs.h
+    #  - cpplint $TRAVIS_BUILD_DIR/lib/graphs/tests/src/test_graphs.cpp
+    #  - cpplint $TRAVIS_BUILD_DIR/lib/parallel_parser/include/parser.h
+    #  - cpplint $TRAVIS_BUILD_DIR/lib/parallel_parser/tests/src/test_parallel_parser.cpp
+    #  - cpplint $TRAVIS_BUILD_DIR/lib/serial_parser/include/parser.h
+    #  - cpplint $TRAVIS_BUILD_DIR/lib/serial_parser/tests/src/test_serial_parser.cpp
+    #  - cpplint $TRAVIS_BUILD_DIR/lib/utils/include/utils.h
   - stage: cppcheck
     script:
      - find . -name "gtest" -prune -name "*.c" -o -name "*.h" -o -name "*.cpp"

@@ -1,5 +1,5 @@
 // / <copyright>© George Illarionov 2021. All rights ignored</copyright>
-#include "graphs.h"
+#include "include/graphs.h"
 
 #include <stdio.h>
 #include <string.h>

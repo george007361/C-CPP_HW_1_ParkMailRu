@@ -4,8 +4,8 @@
 #include "gtest/gtest.h"
 
 extern "C" {
-#include "graphs.h"
-#include "parser.h"
+#include "include/graphs.h"
+#include "include/parser.h"
 }
 
 int main(int argc, char **argv) {

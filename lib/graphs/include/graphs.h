@@ -1,6 +1,6 @@
 //  / <copyright>© George Illarionov 2021. All rights ignored</copyright>
-#ifndef C_CPP_HW_2_PARKMAILRU_LIB_GRAPHS_INCLUDE_GRAPHS_H_
-#define C_CPP_HW_2_PARKMAILRU_LIB_GRAPHS_INCLUDE_GRAPHS_H_
+#ifndef LIB_GRAPHS_INCLUDE_GRAPHS_H_
+#define LIB_GRAPHS_INCLUDE_GRAPHS_H_
 
 #include <stdlib.h>
 
@@ -18,4 +18,4 @@ void free_graph(Graph *graph);
 void free_graphs(Graph ***graphs, size_t *graphs_count);
 int interprier(long *delta, Graph **graphs, const size_t graphs_count,
                const char *key_better, const char *key_worse);
-#endif  // C_CPP_HW_2_PARKMAILRU_LIB_GRAPHS_INCLUDE_GRAPHS_H_
+#endif  // LIB_GRAPHS_INCLUDE_GRAPHS_H_
