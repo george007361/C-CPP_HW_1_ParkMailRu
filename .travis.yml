@@ -14,7 +14,7 @@ jobs:
     script:
      - cmake -B build -DWITH_COVERAGE=1
      - make -C build
-     - $TRAVIS_BUILD_DIR/main --filepath $TRAVIS_BUILD_DIR/data/ex.txt --graph ":)" --graph ":(" --bufsize 50
+     - $TRAVIS_BUILD_DIR/build/main --filepath $TRAVIS_BUILD_DIR/data/ex.txt --graph ":)" --graph ":(" --bufsize 50
      - curl -Os https://uploader.codecov.io/latest/linux/codecov
      - chmod +x codecov
      - gcovr -e 'gtest/' --html
