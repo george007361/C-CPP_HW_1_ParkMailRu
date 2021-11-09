@@ -42,8 +42,9 @@ int count_graph_in_text(unsigned long *count, const char *text,
   step = text_len / parts_count + 1;
 
   //  Общая область памяти для параллельных вычислений
-  long *shared_memory = mmap(NULL, sizeof(long), PROT_READ | PROT_WRITE,
-                             MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+  unsigned long *shared_memory =
+      mmap(NULL, sizeof(unsigned long), PROT_READ | PROT_WRITE,
+           MAP_SHARED | MAP_ANONYMOUS, -1, 0);
 
   if (!shared_memory) {
     fprintf(stderr,
@@ -57,7 +58,7 @@ int count_graph_in_text(unsigned long *count, const char *text,
   if (!part_pids) {
     fprintf(stderr,
             "Error parse_using_graph(): cant allocate memory for pids array\n");
-    munmap(shared_memory, sizeof(long));
+    munmap(shared_memory, sizeof(unsigned long));
 
     return EXIT_CANT_ALLOC_MEM;
   }
@@ -73,7 +74,7 @@ int count_graph_in_text(unsigned long *count, const char *text,
               "Error parse_using_graph(): Cant fork to separate text and "
               "count parallelly. %li\n",
               i);
-      munmap(shared_memory, sizeof(long));
+      munmap(shared_memory, sizeof(unsigned long));
       free(part_pids);
 
       return EXIT_CANT_FORK;
@@ -96,7 +97,7 @@ int count_graph_in_text(unsigned long *count, const char *text,
   *count += *shared_memory;
 
   free(part_pids);
-  if (munmap(shared_memory, sizeof(long))) {
+  if (munmap(shared_memory, sizeof(unsigned long))) {
     fprintf(stderr, "Error parse_text(): Cannot unmap mem\n");
 
     return EXIT_FAIL;

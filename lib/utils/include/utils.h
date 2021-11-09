@@ -4,6 +4,7 @@
 
 #include <stdlib.h>
 
-long counter_simple(const char *array, const size_t len, const char *key);
+unsigned long counter_simple(const char *array, const size_t len,
+                             const char *key);
 
 #endif  // LIB_UTILS_INCLUDE_UTILS_H_

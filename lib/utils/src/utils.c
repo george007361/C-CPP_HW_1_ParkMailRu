@@ -4,7 +4,8 @@
 #include <stdio.h>
 #include <string.h>
 
-long counter_simple(const char *array, const size_t len, const char *key) {
+unsigned long counter_simple(const char *array, const size_t len,
+                             const char *key) {
   if (!array) {
     fprintf(stderr, "Error counter_simple(): array ptr os null.\n");
 

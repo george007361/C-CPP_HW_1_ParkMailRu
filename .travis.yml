@@ -8,6 +8,12 @@ install:
 
 jobs:
  include:
+ 
+  - stage: Build
+    script:
+     - cmake -B build
+     - make -C build
+
   - stage: clang-tidy
     before_script:
      - sudo apt install --yes clang-tidy-10
