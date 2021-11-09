@@ -37,7 +37,13 @@ Graph *set_graph_key(Graph *graph, const char *key) {
 
     return NULL;
   }
-  strcpy(graph->key, key);
+
+  // strcpy(graph->key, key); // Unsafe
+  for (size_t i = 0; i < len; i++) {
+    graph->key[i] = key[i];
+  }
+  graph->key[len] = '\0';
+
   return graph;
 }
 
@@ -54,8 +60,12 @@ Graph *set_graph_count(Graph *graph, const unsigned long count) {
 }
 
 Graph *set_graph(Graph *graph, const char *key, const unsigned long count) {
-  if (!set_graph_key(graph, key)) return NULL;
-  if (!set_graph_count(graph, count)) return NULL;
+  if (!set_graph_key(graph, key)) {
+    return NULL;
+  }
+  if (!set_graph_count(graph, count)) {
+    return NULL;
+  }
 
   return graph;
 }
@@ -67,7 +77,9 @@ Graph *clear_graph(Graph *graph) {
     return NULL;
   }
 
-  if (graph->key) free(graph->key);
+  if (graph->key) {
+    free(graph->key);
+  }
   graph->key = NULL;
 
   graph->count = 0;
@@ -81,9 +93,15 @@ void free_graph(Graph *graph) {
 }
 
 void free_graphs(Graph ***graphs, size_t *graphs_count) {
-  if (!graphs) return;
-  if (!(*graphs)) return;
-  for (size_t i = 0; i < *graphs_count; i++) free_graph((*graphs)[i]);
+  if (!graphs) {
+    return;
+  }
+  if (!(*graphs)) {
+    return;
+  }
+  for (size_t i = 0; i < *graphs_count; i++) {
+    free_graph((*graphs)[i]);
+  }
   free(*graphs);
   *graphs = NULL;
   *graphs_count = 0;
@@ -91,7 +109,8 @@ void free_graphs(Graph ***graphs, size_t *graphs_count) {
 
 int interprier(long *delta, Graph **graphs, const size_t graphs_count,
                const char *key_better, const char *key_worse) {
-  unsigned long count_better = 0, count_worse = 0;
+  unsigned long count_better = 0;
+  unsigned long count_worse = 0;
   if (!graphs) {
     fprintf(stderr, "Error interprier(): Empty graphs array \n");
 
@@ -108,10 +127,14 @@ int interprier(long *delta, Graph **graphs, const size_t graphs_count,
     return EXIT_FAILURE;
   }
   for (size_t i = 0; i < graphs_count; i++) {
-    if (!strcmp(graphs[i]->key, key_better)) count_better = graphs[i]->count;
-    if (!strcmp(graphs[i]->key, key_worse)) count_worse = graphs[i]->count;
+    if (!strcmp(graphs[i]->key, key_better)) {
+      count_better = graphs[i]->count;
+    }
+    if (!strcmp(graphs[i]->key, key_worse)) {
+      count_worse = graphs[i]->count;
+    }
   }
-  *delta = count_better - count_worse;
+  *delta = (long)(count_better - count_worse);
 
   return EXIT_SUCCESS;
 }

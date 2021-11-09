@@ -34,9 +34,11 @@ int count_graph_in_text(unsigned long *count, const char *text,
   // Вычисляем количество разбиений текста, чтобы параллельно считать на разных
   // участках текста
   long parts_count = sysconf(_SC_NPROCESSORS_ONLN);
-  size_t step;
-  while (text_len / PART_MIN_LEN_BYTES < parts_count && parts_count > 1)
+  size_t step = 0;
+  while ((long)(text_len / PART_MIN_LEN_BYTES) < parts_count &&
+         parts_count > 1) {
     parts_count--;
+  }
   step = text_len / parts_count + 1;
 
   //  Общая область памяти для параллельных вычислений
@@ -61,7 +63,7 @@ int count_graph_in_text(unsigned long *count, const char *text,
   }
 
   // Считаем смещение и ставим указатель на начало буфера
-  char *ptr = text;
+  const char *ptr = text;
 
   for (long i = 0; i < parts_count; i++) {
     part_pids[i] = fork();
@@ -69,8 +71,10 @@ int count_graph_in_text(unsigned long *count, const char *text,
     if (part_pids[i] == -1) {
       fprintf(stderr,
               "Error parse_using_graph(): Cant fork to separate text and "
-              "count parallelly. %lu\n",
+              "count parallelly. %li\n",
               i);
+      munmap(shared_memory, sizeof(long));
+      free(part_pids);
 
       return EXIT_CANT_FORK;
     }
@@ -91,12 +95,12 @@ int count_graph_in_text(unsigned long *count, const char *text,
   //  Переносим данные из общей области памяти и очищаем её
   *count += *shared_memory;
 
+  free(part_pids);
   if (munmap(shared_memory, sizeof(long))) {
     fprintf(stderr, "Error parse_text(): Cannot unmap mem\n");
 
     return EXIT_FAIL;
   }
-  free(part_pids);
 
   return EXIT_OK;
 }
@@ -118,9 +122,9 @@ int parse_text(const char *text, const size_t text_len, Graph **graphs,
   }
 
   // Для каждого графа вызываем функцию подсчёта
-  for (size_t i = 0; i < graphs_count; i++)
+  for (size_t i = 0; i < graphs_count; i++) {
     count_graph_in_text(&graphs[i]->count, text, text_len, graphs[i]->key);
-
+  }
   //  Все графы посчитаны
 
   return EXIT_OK;

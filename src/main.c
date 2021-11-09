@@ -23,6 +23,9 @@ enum {
 #define DATA_BUFF_SIZE_MB_DEFAULT 50
 #define DATA_BUFF_SIZE_MB_MIN 50
 #define GRAPH_PTR_BUFF_SIZE 2
+#define MB_TO_BYTES (1024 * 1024)
+#define SEC_TO_MS 1000000
+#define MS_TO_US 1000
 
 int main(int argc, char *argv[]) {
   // Выделяем переменные для парсинка аргументов,
@@ -34,16 +37,19 @@ int main(int argc, char *argv[]) {
   size_t graphs_count_max = GRAPH_PTR_BUFF_SIZE;
   Graph **graphs = (Graph **)malloc(graphs_count_max * sizeof(Graph *));
   int buffer_size = DATA_BUFF_SIZE_MB_DEFAULT;
-
+  int error_occured = 0;
   static struct option longopt[] = {{"filepath", required_argument, 0, 'f'},
                                     {"help", no_argument, 0, 'h'},
                                     {"graph", required_argument, 0, 'd'},
                                     {"bufsize", required_argument, 0, 'b'},
                                     {NULL, 0, 0, 0}};
   // Парсим аргументы
-  while ((opt = getopt_long(argc, argv, "f: m:", longopt, &long_index)) != -1) {
+  while ((opt = getopt_long(argc, argv, "f: m:", longopt, &long_index)) != -1 &&
+         !error_occured) {
     switch (opt) {
         // --help
+      default:
+
       case 'h': {
         printf(
             "Usage:\n"
@@ -53,7 +59,8 @@ int main(int argc, char *argv[]) {
             "--help for help\n\n",
             DATA_BUFF_SIZE_MB_DEFAULT);
 
-        return EXIT_FOR_HELP;
+        error_occured = EXIT_FOR_HELP;
+        break;
       }
 
         // --buffsize
@@ -78,9 +85,9 @@ int main(int argc, char *argv[]) {
         } else {
           fprintf(stderr, "Error main(): incorrect filepath: \"%s\"\n\n",
                   optarg);
-          free_graphs(&graphs, &graphs_count);
 
-          return EXIT_INCOR_FILEPATH;
+          error_occured = EXIT_INCOR_FILEPATH;
+          break;
         }
 
         break;
@@ -89,8 +96,15 @@ int main(int argc, char *argv[]) {
         // --graph
       case 'd': {
         Graph *new_graph = create_graph();
-        if (!new_graph) return EXIT_CANT_CR_GRAPH;
-        if (!set_graph(new_graph, optarg, 0)) return EXIT_CANT_SET_GRAPH;
+        if (!new_graph) {
+          fprintf(stderr, "Error main(): Cant allocate mem for new graph\n");
+          error_occured = EXIT_CANT_CR_GRAPH;
+          break;
+        }
+        if (!set_graph(new_graph, optarg, 0)) {
+          error_occured = EXIT_CANT_SET_GRAPH;
+          break;
+        }
 
         if (graphs_count == graphs_count_max) {
           Graph **new_graphs =
@@ -99,14 +113,16 @@ int main(int argc, char *argv[]) {
           if (!new_graphs) {
             fprintf(stderr,
                     "Error main(): Cant realloc mem for new graphs array. "
-                    "New size %lu\n",
+                    "New size %zu\n",
                     graphs_count_max);
-            free_graphs(&graphs, &graphs_count);
 
-            return EXIT_CANT_MALLOC_MEM;
+            error_occured = EXIT_CANT_MALLOC_MEM;
+            break;
           }
 
-          for (size_t i = 0; i < graphs_count; i++) new_graphs[i] = graphs[i];
+          for (size_t i = 0; i < graphs_count; i++) {
+            new_graphs[i] = graphs[i];
+          }
           free(graphs);
           graphs = new_graphs;
         }
@@ -119,11 +135,19 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  //  Если произошла ошибка выходим
+  if (error_occured) {
+    free_graphs(&graphs, &graphs_count);
+    free(file_path);
+
+    return error_occured;
+  }
+
   // Проверяем наличие нужных аргументов
   if (!fpath_added || !graphs_count) {
     printf(
         "There are not necessary args added. Use --help key for help\nFile "
-        "Path to data file: %d\nGraphs added count: %lu\n\n",
+        "Path to data file: %d\nGraphs added count: %zu\n\n",
         fpath_added, graphs_count);
     free_graphs(&graphs, &graphs_count);
     free(file_path);
@@ -131,7 +155,7 @@ int main(int argc, char *argv[]) {
     return EXIT_NO_NEC_PARAMS;
   }
 
-  //открываем файл
+  //  открываем файл
   FILE *file = fopen(file_path, "r");
   if (!file) {
     fprintf(stderr, "Error main(): cannot open file %s\n", file_path);
@@ -142,7 +166,7 @@ int main(int argc, char *argv[]) {
   }
 
   //  Выделяем буфер заданного размера
-  size_t buffer_size_bytes = buffer_size * 1024 * 1024 / sizeof(char);
+  size_t buffer_size_bytes = buffer_size * MB_TO_BYTES / sizeof(char);
   char *buffer = (char *)malloc(buffer_size_bytes + 1);
   if (!buffer) {
     fprintf(stderr, "Error main(): cannot alloc buffer for %i Mb\n",
@@ -155,8 +179,9 @@ int main(int argc, char *argv[]) {
 
   // заполняем буфер из файла и выполняем подсчёт количества включений искомого
   // графа в тексте по частям, измеряем время
-  struct timespec start_time, end_time;
-  size_t bytes_read;
+  struct timespec start_time;
+  struct timespec end_time;
+  size_t bytes_read = 0;
 
   clock_gettime(CLOCK_REALTIME, &start_time);
 
@@ -190,30 +215,31 @@ int main(int argc, char *argv[]) {
   for (size_t i = 0; i < graphs_count; i++) {
     printf("\tGraph \"%s\" : %lu times\n", graphs[i]->key, graphs[i]->count);
   }
-  double time_passed = (1000000 * (end_time.tv_sec - start_time.tv_sec) +
-                        (end_time.tv_nsec - start_time.tv_nsec) / 1000);
-  printf("\nTime passed: %.2lf ms\n\n", time_passed);
+  time_t time_passed = (SEC_TO_MS * (end_time.tv_sec - start_time.tv_sec) +
+                        (end_time.tv_nsec - start_time.tv_nsec) / MS_TO_US);
+  printf("\nTime passed: %li ms\n\n", time_passed);
 
   //  Интерпретируем результат
   long d_count = 0;
   if (!interprier(&d_count, graphs, graphs_count, ":)", ":(")) {
-    if (d_count > 0)
+    if (d_count > 0) {
       printf(
-          "Chat is positive. Count of :) bigger than count of :( more by %lu\n",
+          "Chat is positive. Count of :) bigger than count of :( more by %li\n",
           d_count);
-    else if (d_count < 0)
-
+    } else if (d_count < 0) {
       printf(
-          "Chat is negative. Count of :( bigger than count of :) more by %lu\n",
+          "Chat is negative. Count of :( bigger than count of :) more by %li\n",
           -1 * d_count);
-    else
+    } else {
       printf(
           "Cannot understand. Count of :) and :( graphs matches or not found "
           "in text\n\n");
+    }
   } else {
     fprintf(stderr,
             "Error interprier() in main(): cant interpritate result\n\n");
   }
+
   // Освобождаем память
   free_graphs(&graphs, &graphs_count);
   free(buffer);

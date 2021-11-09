@@ -8,10 +8,16 @@ install:
 
 jobs:
  include:
-  - stage: Build
+  - stage: clang-tidy
+    before_script:
+     - sudo apt install --yes clang-tidy-10
     script:
-     - cmake -B build
-     - make -C build
+     - echo "----------PARALLEL_PARSER-------------"
+     - cmake -B build -DUSE_SERIAL=0 -DCMAKE_EXPORT_COMPILE_COMMANDS=1
+     - find -name "*.c" -o -name "*.h" | egrep -v "gtest|build|serial" | xargs clang-tidy-10 -p ./build/compile_commands.json -checks=*,-cert-err34-c,-android-cloexec-fopen,-llvm-*,-readability-avoid-const-params-in-decls,-hicpp-signed-bitwise
+     - echo "----------SERIAL_PARSER-------------"
+     - cmake -B build -DUSE_SERIAL=1 -DCMAKE_EXPORT_COMPILE_COMMANDS=1
+     - find -name "*.c" -o -name "*.h" | egrep -v "gtest|build|parallel" | xargs clang-tidy-10 -p ./build/compile_commands.json -checks=*,-cert-err34-c,-android-cloexec-fopen,-llvm-*,-readability-avoid-const-params-in-decls,-hicpp-signed-bitwise
 
   - stage: GTest
     script:
@@ -49,7 +55,7 @@ jobs:
      - $TRAVIS_BUILD_DIR/build/main --filepath $TRAVIS_BUILD_DIR/data/ex.txt --graph ":)" --graph ":("
      - cmake -B build -DUSE_SERIAL=1 -DWITH_SANITIZERS=1
      - make -C build
-     - echo "----------PARALLEL_PARSER-------------"
+     - echo "----------SERIAL_PARSER-------------"
      - echo "----------ALL OK-------------"
      - $TRAVIS_BUILD_DIR/build/main --filepath $TRAVIS_BUILD_DIR/data/ex.txt --graph ":)" --graph ":("
 
@@ -64,7 +70,7 @@ jobs:
      - valgrind $TRAVIS_BUILD_DIR/build/main --filepath $TRAVIS_BUILD_DIR/data/ex.txt --graph ":)" --graph ":("
      - cmake -B build -DUSE_SERIAL=1
      - make -C build
-     - echo "----------PARALLEL_PARSER-------------"
+     - echo "----------SERIAL_PARSER-------------"
      - echo "----------ALL OK-------------"
      - valgrind $TRAVIS_BUILD_DIR/build/main --filepath $TRAVIS_BUILD_DIR/data/ex.txt --graph ":)" --graph ":("
      
@@ -72,20 +78,22 @@ jobs:
     before_script:
      - sudo pip install cpplint
     script:
-     - find $TRAVIS_BUILD_DIR/ -name "gtest" -prune -name "*.c" -o -name "*.h" -o -name "*.cpp" | xargs cpplint --filter=-runtime/int,-readability/casting,-build/include_subdir
- 
+     - find -name "*.c" -o -name "*.h" -o -name "*.cpp" | egrep -v "gtest|build" | xargs cpplint --filter=-runtime/int,-readability/casting,-build/include_subdir 
+  
   - stage: cppcheck
     before_script:
      - sudo apt install cppcheck
     script:
-     - find . -name "gtest" -prune -name "*.c" -o -name "*.h" -o -name "*.cpp" | xargs cppcheck --enable=warning,performance,portability 
+     - find -name "*.c" -o -name "*.h" -o -name "*.cpp" | egrep -v "gtest|build" | xargs cppcheck --enable=warning,performance,portability 
  
   - stage: scan-build
     before_script:
      - sudo apt install cppcheck
     script:
+     - echo "----------PARALLEL_PARSER-------------"
      - cmake -B build -DUSE_SERIAL=0
      - scan-build make -C build
+     - echo "----------SERIAL_PARSER-------------"
      - cmake -B build -DUSE_SERIAL=1
      - scan-build make -C build
   
@@ -93,4 +101,4 @@ jobs:
     before_script:
      - sudo apt install --yes clang-format-10
     script:
-     - find . -name "gtest" -prune -name "*.c" -o -name "*.h" -o -name "*.cpp" | xargs clang-format-10 -dry-run -style=Google
+     - find -name "*.c" -o -name "*.h" | egrep -v "gtest|build|serial" | xargs clang-format-10 -dry-run -style=Google
